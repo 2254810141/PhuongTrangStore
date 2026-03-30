@@ -1,11 +1,11 @@
 ﻿import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import '../../styles/Header.css'
 
 const navLinks = [
   { label: 'Trang chủ', to: '/' },
-  { label: 'Laptop', to: '/home#laptops' },
-  { label: 'Phụ kiện', to: '/home#accessories' },
+  { label: 'Laptop', to: '/products/laptop' },
+  { label: 'Phụ kiện', to: '/accessories' },
 ]
 
 function Header() {
@@ -27,9 +27,7 @@ function Header() {
             <NavLink
               key={link.to}
               to={link.to}
-              className={({ isActive }) =>
-                `nav__link ${isActive ? 'nav__link--active' : ''}`
-              }
+              className={({ isActive }) => `nav__link ${isActive ? 'nav__link--active' : ''}`}
               onClick={closeMenu}
             >
               {link.label}
@@ -38,12 +36,16 @@ function Header() {
         </nav>
 
         <div className="header__actions">
-          <button className="ghost-btn" type="button">
-            Tìm kiếm
-          </button>
-          <button className="primary-btn" type="button">
+          <input
+            type="search"
+            className="header-search"
+            placeholder="Bạn muốn mua gì hôm nay..."
+            aria-label="Tìm kiếm sản phẩm"
+          />
+          <Link to="/cart" className="cart-btn" onClick={closeMenu}>
             Giỏ hàng
-          </button>
+          </Link>
+          <button className="ghost-btn" type="button">Đăng nhập</button>
           <button className="menu-toggle" type="button" onClick={toggleMenu} aria-label="Mở menu">
             <span />
             <span />

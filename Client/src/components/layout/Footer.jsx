@@ -1,4 +1,5 @@
 ﻿import '../../styles/Footer.css'
+import { Link } from 'react-router-dom'
 
 function Footer() {
   return (
@@ -14,9 +15,9 @@ function Footer() {
 
         <div className="footer__links">
           <p className="footer__label">Danh mục</p>
-          <a href="#laptops">Laptop</a>
-          <a href="#accessories">Phụ kiện</a>
-          <a href="#top">Khuyến mãi</a>
+          <Link to="/products/laptop">Laptop</Link>
+          <Link to="/accessories">Phụ kiện</Link>
+          <Link to="/">Khuyến mãi</Link>
         </div>
 
         <div className="footer__links">

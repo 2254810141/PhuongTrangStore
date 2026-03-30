@@ -1,4 +1,5 @@
 ﻿import heroImg from '../../assets/hero.png'
+import { Link } from 'react-router-dom'
 import '../../styles/HomePage.css'
 const featured = [
   {
@@ -55,12 +56,12 @@ function HomePage() {
               laptop phù hợp nhất trong vài phút.
             </p>
             <div className="hero__actions">
-              <a className="primary-btn" href="#laptops">
+              <Link className="primary-btn" to="/products/laptop">
                 Xem danh sách
-              </a>
-              <a className="ghost-btn" href="#accessories">
+              </Link>
+              <Link className="ghost-btn" to="/accessories">
                 Xem phụ kiện
-              </a>
+              </Link>
             </div>
             <div className="hero__meta">
               <span>Miễn phí cài đặt & vệ sinh định kỳ</span>
@@ -83,9 +84,9 @@ function HomePage() {
             <h2>Top lựa chọn nổi bật</h2>
             <p className="muted">Đã tinh chỉnh cấu hình, tản nhiệt và bảo hành để sẵn sàng sử dụng.</p>
           </div>
-          <a className="link" href="#accessories">
+          <Link className="link" to="/accessories">
             Xem thêm phụ kiện →
-          </a>
+          </Link>
         </div>
         <div className="container card-grid">
           {featured.map((item) => (
@@ -105,9 +106,6 @@ function HomePage() {
                 <button type="button" className="primary-btn">
                   Thêm vào giỏ
                 </button>
-                <button type="button" className="ghost-btn">
-                  So sánh
-                </button>
               </div>
             </article>
           ))}
@@ -121,9 +119,9 @@ function HomePage() {
             <h2>Chọn theo nhu cầu</h2>
             <p className="muted">Mọi thứ từ gaming, văn phòng đến đồ họa chuyên nghiệp.</p>
           </div>
-          <a className="link" href="#accessories">
+          <Link className="link" to="/accessories">
             Xem phụ kiện hot →
-          </a>
+          </Link>
         </div>
         <div className="container category-grid">
           {categories.map((cat) => (
@@ -131,9 +129,9 @@ function HomePage() {
               <div className="pill pill--soft">{cat.badge}</div>
               <h3>{cat.title}</h3>
               <p className="muted">{cat.text}</p>
-              <a className="link" href="#laptops">
+              <Link className="link" to="/products/laptop">
                 Xem gợi ý
-              </a>
+              </Link>
             </article>
           ))}
         </div>
