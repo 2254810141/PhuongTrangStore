@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
+using StartComputer.BLL.Interfaces;
+using StartComputer.BLL.Services;
+using StartComputer.DAL.Interfaces;
+using StartComputer.DAL.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +12,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
