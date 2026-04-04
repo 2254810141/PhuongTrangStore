@@ -1,32 +1,8 @@
 ﻿import heroImg from '../../assets/hero.png'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../../styles/HomePage.css'
-const featured = [
-  {
-    id: 'laptop-rog-g16',
-    name: 'ROG Zephyrus G16 2025',
-    price: '42.990.000₫',
-    desc: 'Hiệu năng flagship cho gaming và sáng tạo nội dung 4K.',
-    specs: ['Intel Core Ultra 9', 'RTX 4070 8GB', '32GB DDR5', '1TB NVMe PCIe 4.0'],
-    badge: 'Hàng sẵn kho',
-  },
-  {
-    id: 'laptop-mbp-m4',
-    name: 'MacBook Pro 14" M4',
-    price: '54.990.000₫',
-    desc: 'Màn mini‑LED, pin 18 giờ, tối ưu cho lập trình và đồ họa.',
-    specs: ['Apple M4 Pro', '14" Liquid Retina XDR', '18GB RAM', '512GB SSD'],
-    badge: 'Trả góp 0%',
-  },
-  {
-    id: 'laptop-thinkpad-x1',
-    name: 'Lenovo ThinkPad X1 Carbon',
-    price: '36.490.000₫',
-    desc: 'Siêu nhẹ 1.1kg, bàn phím huyền thoại, bảo mật vPro.',
-    specs: ['Intel Core Ultra 7', 'Intel Arc', '16GB LPDDR5X', '1TB SSD'],
-    badge: 'Doanh nghiệp',
-  },
-]
+import { getProducts } from '../../services/productApi'
 
 const categories = [
   {
@@ -47,6 +23,29 @@ const categories = [
 ]
 
 function HomePage() {
+  const [featured, setFeatured] = useState([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    ;(async () => {
+      try {
+        const data = await getProducts()
+        if (isMounted) {
+          setFeatured(data.filter((item) => item.isActive).slice(0, 3))
+        }
+      } catch {
+        if (isMounted) {
+          setFeatured([])
+        }
+      }
+    })()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <div className="home-page">
       <section className="hero-section" id="top">
@@ -96,10 +95,11 @@ function HomePage() {
             <article className="product-card" key={item.name}>
               <div className="product-card__top">
                 <span className="pill pill--soft">{item.badge}</span>
-                <span className="price">{item.price}</span>
+                <span className="price">{item.displayPrice}</span>
               </div>
+              {item.image && <img src={item.image} alt={item.name} />}
               <h3>{item.name}</h3>
-              <p className="muted">{item.desc}</p>
+              <p className="muted">{item.description}</p>
               <ul className="spec-list">
                 {item.specs.map((spec) => (
                   <li key={spec}>{spec}</li>

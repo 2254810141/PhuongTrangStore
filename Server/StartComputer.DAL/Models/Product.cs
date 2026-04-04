@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Server.Models;
+namespace StartComputer.DAL.Models;
 
 public partial class Product
 {

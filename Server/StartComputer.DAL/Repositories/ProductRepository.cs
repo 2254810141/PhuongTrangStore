@@ -1,5 +1,5 @@
 ﻿namespace StartComputer.DAL.Repositories;
-using Server.Models;
+using StartComputer.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using StartComputer.DAL.Interfaces;
 public class ProductRepository : IProductRepository

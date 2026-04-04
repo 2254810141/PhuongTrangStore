@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
-namespace Server.Models;
+namespace StartComputer.DAL.Models;
 
 public partial class AppDbContext : DbContext
 {
@@ -15,11 +16,15 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Accessory> Accessories { get; set; }
+
     public virtual DbSet<Brand> Brands { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
+
+    public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
@@ -28,25 +33,45 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (optionsBuilder.IsConfigured)
-        {
-            return;
-        }
-
-        // Optional local fallback for design-time/runtime when DI is not wired.
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-        if (!string.IsNullOrWhiteSpace(connectionString))
-        {
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-        }
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySql("server=localhost;port=3306;database=start_computer;user=root;password=hoang20122004H@", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.45-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .UseCollation("utf8mb4_0900_ai_ci")
             .HasCharSet("utf8mb4");
+
+        modelBuilder.Entity<Accessory>(entity =>
+        {
+            entity.HasKey(e => e.AccessoryId).HasName("PRIMARY");
+
+            entity.ToTable("accessories");
+
+            entity.Property(e => e.AccessoryId).HasColumnName("accessory_id");
+            entity.Property(e => e.AccessoryName)
+                .HasMaxLength(200)
+                .HasColumnName("accessory_name");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Description)
+                .HasColumnType("text")
+                .HasColumnName("description");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(255)
+                .HasColumnName("image_url");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_active");
+            entity.Property(e => e.Price)
+                .HasPrecision(15, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.StockQuantity)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("stock_quantity");
+        });
 
         modelBuilder.Entity<Brand>(entity =>
         {
@@ -103,11 +128,14 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("order_items");
 
+            entity.HasIndex(e => e.AccessoryId, "accessory_id");
+
             entity.HasIndex(e => e.OrderId, "order_id");
 
             entity.HasIndex(e => e.ProductId, "product_id");
 
             entity.Property(e => e.OrderItemId).HasColumnName("order_item_id");
+            entity.Property(e => e.AccessoryId).HasColumnName("accessory_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
@@ -115,13 +143,52 @@ public partial class AppDbContext : DbContext
                 .HasPrecision(15, 2)
                 .HasColumnName("unit_price");
 
+            entity.HasOne(d => d.Accessory).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.AccessoryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("order_items_ibfk_3");
+
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("order_items_ibfk_1");
 
             entity.HasOne(d => d.Product).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("order_items_ibfk_2");
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.PaymentId).HasName("PRIMARY");
+
+            entity.ToTable("payments");
+
+            entity.HasIndex(e => e.OrderId, "order_id");
+
+            entity.Property(e => e.PaymentId).HasColumnName("payment_id");
+            entity.Property(e => e.Amount)
+                .HasPrecision(15, 2)
+                .HasColumnName("amount");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("created_at");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PaymentMethod)
+                .HasMaxLength(50)
+                .HasColumnName("payment_method");
+            entity.Property(e => e.PaymentStatus)
+                .HasMaxLength(50)
+                .HasDefaultValueSql("'pending'")
+                .HasColumnName("payment_status");
+            entity.Property(e => e.TransactionCode)
+                .HasMaxLength(100)
+                .HasColumnName("transaction_code");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("payments_ibfk_1");
         });
 
         modelBuilder.Entity<Product>(entity =>

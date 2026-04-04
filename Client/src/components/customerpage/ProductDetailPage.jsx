@@ -1,18 +1,51 @@
 ﻿import { useParams, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import '../../styles/ProductDetail.css'
-import { findLaptopById } from '../../data/catalog'
+import { getProductById } from '../../services/productApi'
 
 function ProductDetailPage({ onAddToCart = () => {} }) {
   const { productId } = useParams()
-  const product = findLaptopById(productId)
+  const [product, setProduct] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    ;(async () => {
+      try {
+        const data = await getProductById(productId)
+        if (isMounted) {
+          setProduct(data)
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    })()
+
+    return () => {
+      isMounted = false
+    }
+  }, [productId])
+
+  if (isLoading) {
+    return (
+      <main className="detail-page section">
+        <div className="container detail-card">
+          <p className="muted">Dang tai thong tin san pham...</p>
+        </div>
+      </main>
+    )
+  }
 
   if (!product) {
     return (
       <main className="detail-page section">
         <div className="container detail-card">
-          <p className="muted">Không tìm thấy sản phẩm.</p>
+          <p className="muted">Khong tim thay san pham.</p>
           <Link to="/products/laptop" className="ghost-btn">
-            Quay lại danh sách Laptop
+            Quay lai danh sach Laptop
           </Link>
         </div>
       </main>

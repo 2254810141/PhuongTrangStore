@@ -1,8 +1,54 @@
 ﻿import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import '../../styles/ShopPage.css'
-import { laptopProducts } from '../../data/catalog'
+import { getProducts } from '../../services/productApi'
 
 function ProductPage({ onAddToCart = () => {} }) {
+  const [products, setProducts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    ;(async () => {
+      try {
+        const data = await getProducts()
+        if (isMounted) {
+          setProducts(data.filter((item) => item.isActive))
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Khong the tai san pham')
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    })()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <main className="shop-page section">
+        <div className="container">Dang tai san pham...</div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="shop-page section">
+        <div className="container">{error}</div>
+      </main>
+    )
+  }
+
   return (
     <main className="shop-page section">
       <div className="container section__header">
@@ -14,8 +60,9 @@ function ProductPage({ onAddToCart = () => {} }) {
       </div>
 
       <div className="container shop-grid">
-        {laptopProducts.map((item) => (
+        {products.map((item) => (
           <article className="shop-card" key={item.id}>
+            {item.image && <img src={item.image} alt={item.name} />}
             <h3>{item.name}</h3>
             <p className="shop-price">{item.displayPrice}</p>
             <ul className="spec-list">

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Server.Models;
+using StartComputer.DAL.Models;
 using StartComputer.BLL.Interfaces;
 using StartComputer.BLL.Services;
 using StartComputer.DAL.Interfaces;
@@ -11,6 +11,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173", "https://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -26,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("ClientPolicy");
 
 app.MapControllers();
 

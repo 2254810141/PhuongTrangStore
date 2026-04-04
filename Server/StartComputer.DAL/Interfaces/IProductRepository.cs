@@ -1,5 +1,5 @@
 ﻿namespace StartComputer.DAL.Interfaces;
-using Server.Models;
+using StartComputer.DAL.Models;
 
 public interface IProductRepository
 {
