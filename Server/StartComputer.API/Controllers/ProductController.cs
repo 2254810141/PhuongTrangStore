@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using StartComputer.BLL.DTOs;
 using StartComputer.BLL.Interfaces;
-using StartComputer.BLL.Services;
 
 
 namespace StartComputer.API.Controllers;
@@ -10,27 +9,33 @@ namespace StartComputer.API.Controllers;
 [Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
-    // constructor
     private readonly IProductService _productService;
-    
-    // DI trong .net
-
-
 
     public ProductController(IProductService productService)
     {
         _productService = productService;
     }
+
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? keyword)
     {
-        if (string.IsNullOrEmpty(keyword))
-        {
-            var products = await _productService.GetAllAsync();
-            return Ok(products);
-        }
-        var searchResult = await _productService.SearchByNameAsync(keyword);
-        return Ok(searchResult);
+        var products = await _productService.GetByKeywordAsync(keyword);
+        return Ok(products);
     }
-    
+
+    [HttpPut("{productId:int}")]
+    public async Task<IActionResult> Update(int productId, [FromBody] UpdateProductRequest request)
+    {
+        try
+        {
+            var updated = await _productService.UpdateAsync(productId, request);
+            if (updated is null) return NotFound("Không tìm thấy sản phẩm ");
+
+            return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
