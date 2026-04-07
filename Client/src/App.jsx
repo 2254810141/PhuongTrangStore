@@ -10,6 +10,7 @@ import RegisterPage from './components/customerpage/RegisterPage'
 import ForgotPasswordPage from './components/customerpage/ForgotPasswordPage'
 import ProductDetailPage from './components/customerpage/ProductDetailPage'
 import AccessoryDetailPage from './components/customerpage/AccessoryDetailPage'
+import SearchResultsPage from './components/customerpage/SearchResultsPage'
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/products/:productId" element={<ProductDetailPage />} />
           <Route path="/accessories" element={<AccessoriesPage />} />
           <Route path="/accessories/:accessoryId" element={<AccessoryDetailPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

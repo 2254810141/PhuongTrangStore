@@ -1,4 +1,4 @@
-﻿import heroImg from '../../assets/hero.png'
+﻿import heroImg from '../../assets/DellInspiron15.jpg'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../../styles/HomePage.css'
@@ -72,7 +72,7 @@ function HomePage() {
           </div>
           <div className="hero__visual">
             <div className="hero__card">
-              <img src={heroImg} alt="Laptop cao cấp" />
+              <img src={heroImg} alt="Laptop cao cap" />
               <div className="hero__floating">Giảm đến 3.000.000₫ + quà tặng</div>
             </div>
           </div>

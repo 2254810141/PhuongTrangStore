@@ -70,8 +70,12 @@
   gap: 8px;
 }
 
-.header-search {
+.header-search-form {
   width: min(440px, 38vw);
+}
+
+.header-search {
+  width: 100%;
   height: 36px;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -98,6 +102,16 @@
   background: linear-gradient(135deg, var(--accent), #1d4ed8);
   color: #fff;
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+}
+
+.header__actions .ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 14px;
 }
 
 
@@ -147,6 +161,7 @@
     display: none;
   }
 
+  .header-search-form,
   .header-search {
     display: none;
   }

@@ -20,6 +20,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Brand> Brands { get; set; }
 
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -85,6 +87,45 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.BrandName)
                 .HasMaxLength(50)
                 .HasColumnName("brand_name");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.CartItemId).HasName("PRIMARY");
+
+            entity.ToTable("cart_items");
+
+            entity.HasIndex(e => e.AccessoryId, "accessory_id");
+
+            entity.HasIndex(e => e.ProductId, "product_id");
+
+            entity.HasIndex(e => e.UserId, "user_id");
+
+            entity.Property(e => e.CartItemId).HasColumnName("cart_item_id");
+            entity.Property(e => e.AccessoryId).HasColumnName("accessory_id");
+            entity.Property(e => e.AddedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("added_at");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Quantity)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("quantity");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Accessory).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.AccessoryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("cart_items_ibfk_3");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("cart_items_ibfk_2");
+
+            entity.HasOne(d => d.User).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("cart_items_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>

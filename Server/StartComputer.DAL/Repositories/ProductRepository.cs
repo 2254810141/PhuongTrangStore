@@ -15,4 +15,10 @@ public class ProductRepository : IProductRepository
     {
         return await _context.Products.ToListAsync();
     }
+
+    public async Task<IEnumerable<Product>> SearchByNameAsync(string keyword)
+    {
+        var key = keyword.Trim();
+        return await _context.Products.Where(p => p.ProductName.Contains(key)).ToListAsync();
+    }
 }

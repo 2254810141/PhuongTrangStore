@@ -8,28 +8,25 @@ function toAbsoluteImageUrl(path) {
   return `${API_BASE_URL}/${normalized}`
 }
 
-function mapProductDto(item) {
+function mapAccessoryDto(item) {
   const price = Number(item.price ?? 0)
   const stockQuantity = item.stockQuantity ?? 0
+  const isActive = item.isActive ?? true
 
   return {
-    id: String(item.productId),
-    name: item.productName ?? 'Sản phẩm',
+    id: String(item.accessoryId),
+    name: item.accessoryName ?? 'Phụ kiện',
     price,
     displayPrice: `${price.toLocaleString('vi-VN')} VND`,
-    stockQuantity,
-    image: toAbsoluteImageUrl(item.productsImages),
-    isActive: item.isActive ?? true,
-    description:
-      stockQuantity > 0
-        ? `Còn ${stockQuantity} sản phẩm trong kho.`
-        : 'Tạm hết hàn , vui lòng liên hệ để được tư vấn.',
-    specs: [
+    desc: item.description ?? 'Phụ kiện chính hãng cho góc làm việc của bạn.',
+    details: [
       `Giá: ${price.toLocaleString('vi-VN')} VND`,
       `Tồn kho: ${stockQuantity}`,
-      item.isActive ? 'Đang kinh doanh' : 'Ngừng kinh doanh',
+      isActive ? 'Đang kinh doanh' : 'Ngừng kinh doanh',
     ],
-    badge: stockQuantity > 0 ? 'Hàng sẵn kho' : 'Hết hàng',
+    image: toAbsoluteImageUrl(item.imageUrl),
+    stockQuantity,
+    isActive,
   }
 }
 
@@ -42,28 +39,28 @@ function filterByKeyword(items, keyword) {
   return items.filter((item) => item.name.toLowerCase().includes(normalizedKeyword))
 }
 
-export async function getProducts(keyword = '') {
+export async function getAccessories(keyword = '') {
   const params = new URLSearchParams()
   if (keyword.trim()) {
     params.set('keyword', keyword.trim())
   }
 
-  const url = params.toString() ? `${API_BASE_URL}/api/Product?${params.toString()}` : `${API_BASE_URL}/api/Product`
+  const url = params.toString()
+    ? `${API_BASE_URL}/api/Accessory?${params.toString()}`
+    : `${API_BASE_URL}/api/Accessory`
   const response = await fetch(url)
 
   if (!response.ok) {
-    throw new Error(`Không thể tải danh sách sản phẩm (${response.status})`)
+    throw new Error(`Không thể tải danh sách phụ kiện (${response.status})`)
   }
 
   const data = await response.json()
-  const mappedData = Array.isArray(data) ? data.map(mapProductDto) : []
+  const mappedData = Array.isArray(data) ? data.map(mapAccessoryDto) : []
   return filterByKeyword(mappedData, keyword)
 }
 
-export async function getProductById(productId) {
-  const products = await getProducts()
-  return products.find((item) => item.id === String(productId)) ?? null
+export async function getAccessoryById(accessoryId) {
+  const accessories = await getAccessories()
+  return accessories.find((item) => item.id === String(accessoryId)) ?? null
 }
-
-
 

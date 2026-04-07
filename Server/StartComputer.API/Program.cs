@@ -23,9 +23,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-
+// DI
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
+builder.Services.AddScoped<IAccessoryService, AccessoryService>();
+
+
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
