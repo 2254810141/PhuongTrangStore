@@ -10,10 +10,10 @@ public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
 
-    public ProductService(IProductRepository productRepository)
-    {
-        _productRepository = productRepository;
-    }
+      public ProductService(IProductRepository productRepository)
+       {
+           _productRepository = productRepository;
+       }
     
     public async Task<IEnumerable<ProductDto>>GetAllAsync()
     {
@@ -21,12 +21,8 @@ public class ProductService : IProductService
         return products.Select(ProductDataDto);
     }
 
-    public async Task<IEnumerable<ProductDto>> GetByKeywordAsync(string? keyword)
+    public async Task<IEnumerable<ProductDto>> SearchByNameAsync(string keyword)
     {
-        if (string.IsNullOrWhiteSpace(keyword))
-        {
-            return await GetAllAsync();
-        }
 
         var products = await _productRepository.SearchByNameAsync(keyword.Trim());
         return products.Select(ProductDataDto);

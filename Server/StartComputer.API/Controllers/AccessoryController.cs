@@ -15,9 +15,21 @@ public class AccessoryController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? keyword)
+    public async Task<IActionResult> GetAll()
     {
-        var accessories = await _accessoryService.GetByKeywordAsync(keyword);
+        var accessories = await _accessoryService.GetAllAsync();
+        return Ok(accessories);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchByName([FromQuery] string keyword)
+    {
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            return BadRequest("Từ khóa tìm kiếm không được để trống.");
+        }
+
+        var accessories = await _accessoryService.SearchByNameAsync(keyword);
         return Ok(accessories);
     }
 }

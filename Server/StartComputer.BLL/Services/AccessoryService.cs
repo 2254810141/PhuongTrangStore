@@ -20,12 +20,8 @@ public class AccessoryService : IAccessoryService
         return accessories.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<AccessoryDto>> GetByKeywordAsync(string? keyword)
+    public async Task<IEnumerable<AccessoryDto>> SearchByNameAsync(string keyword)
     {
-        if (string.IsNullOrWhiteSpace(keyword))
-        {
-            return await GetAllAsync();
-        }
 
         var result = await _accessoryRepository.SearchByNameAsync(keyword.Trim());
         return result.Select(MapToDto);

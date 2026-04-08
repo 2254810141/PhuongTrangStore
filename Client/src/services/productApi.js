@@ -33,22 +33,11 @@ function mapProductDto(item) {
   }
 }
 
-function filterByKeyword(items, keyword) {
-  const normalizedKeyword = keyword.trim().toLowerCase()
-  if (!normalizedKeyword) {
-    return items
-  }
-
-  return items.filter((item) => item.name.toLowerCase().includes(normalizedKeyword))
-}
-
 export async function getProducts(keyword = '') {
-  const params = new URLSearchParams()
-  if (keyword.trim()) {
-    params.set('keyword', keyword.trim())
-  }
-
-  const url = params.toString() ? `${API_BASE_URL}/api/Product?${params.toString()}` : `${API_BASE_URL}/api/Product`
+  const trimmedKeyword = keyword.trim()
+  const url = trimmedKeyword
+    ? `${API_BASE_URL}/api/Product/search?keyword=${encodeURIComponent(trimmedKeyword)}`
+    : `${API_BASE_URL}/api/Product`
   const response = await fetch(url)
 
   if (!response.ok) {
@@ -56,8 +45,7 @@ export async function getProducts(keyword = '') {
   }
 
   const data = await response.json()
-  const mappedData = Array.isArray(data) ? data.map(mapProductDto) : []
-  return filterByKeyword(mappedData, keyword)
+  return Array.isArray(data) ? data.map(mapProductDto) : []
 }
 
 export async function getProductById(productId) {

@@ -30,23 +30,10 @@ function mapAccessoryDto(item) {
   }
 }
 
-function filterByKeyword(items, keyword) {
-  const normalizedKeyword = keyword.trim().toLowerCase()
-  if (!normalizedKeyword) {
-    return items
-  }
-
-  return items.filter((item) => item.name.toLowerCase().includes(normalizedKeyword))
-}
-
 export async function getAccessories(keyword = '') {
-  const params = new URLSearchParams()
-  if (keyword.trim()) {
-    params.set('keyword', keyword.trim())
-  }
-
-  const url = params.toString()
-    ? `${API_BASE_URL}/api/Accessory?${params.toString()}`
+  const trimmedKeyword = keyword.trim()
+  const url = trimmedKeyword
+    ? `${API_BASE_URL}/api/Accessory/search?keyword=${encodeURIComponent(trimmedKeyword)}`
     : `${API_BASE_URL}/api/Accessory`
   const response = await fetch(url)
 
@@ -55,8 +42,7 @@ export async function getAccessories(keyword = '') {
   }
 
   const data = await response.json()
-  const mappedData = Array.isArray(data) ? data.map(mapAccessoryDto) : []
-  return filterByKeyword(mappedData, keyword)
+  return Array.isArray(data) ? data.map(mapAccessoryDto) : []
 }
 
 export async function getAccessoryById(accessoryId) {

@@ -17,9 +17,21 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? keyword)
+    public async Task<IActionResult> GetAll()
     {
-        var products = await _productService.GetByKeywordAsync(keyword);
+        var products = await _productService.GetAllAsync();
+        return Ok(products);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchByName([FromQuery] string keyword)
+    {
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            return BadRequest("Từ khóa tìm kiếm không được để trống.");
+        }
+
+        var products = await _productService.SearchByNameAsync(keyword);
         return Ok(products);
     }
 
