@@ -5,4 +5,5 @@ public interface IAccessoryService
 {
     Task<IEnumerable<AccessoryDto>> GetAllAsync();
     Task<IEnumerable<AccessoryDto>> SearchByNameAsync(string keyword);
+    
 }

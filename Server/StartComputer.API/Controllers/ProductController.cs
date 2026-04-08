@@ -2,7 +2,6 @@
 using StartComputer.BLL.DTOs;
 using StartComputer.BLL.Interfaces;
 
-
 namespace StartComputer.API.Controllers;
 
 [ApiController]
@@ -23,27 +22,72 @@ public class ProductController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("{productId:int}")]
+    public async Task<IActionResult> GetById(int productId)
+    {
+        try
+        {
+            var product = await _productService.GetByIdAsync(productId);
+            if (product is null) return NotFound("No product found.");
+            return Ok(product);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("search")]
     public async Task<IActionResult> SearchByName([FromQuery] string keyword)
     {
         if (string.IsNullOrWhiteSpace(keyword))
-        {
-            return BadRequest("Từ khóa tìm kiếm không được để trống.");
-        }
+            return BadRequest("The search keyword must not be left blank.");
 
         var products = await _productService.SearchByNameAsync(keyword);
         return Ok(products);
     }
 
     [HttpPut("{productId:int}")]
-    public async Task<IActionResult> Update(int productId, [FromBody] UpdateProductRequest request)
+    public async Task<IActionResult> Update(int productId, [FromBody] UpdateProductRequest? request)
     {
+        if (request is null) return BadRequest("Invalid data submitted.");
+
         try
         {
             var updated = await _productService.UpdateAsync(productId, request);
-            if (updated is null) return NotFound("Không tìm thấy sản phẩm ");
-
+            if (updated is null) return NotFound("No product found.");
             return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest? request)
+    {
+        if (request is null) return BadRequest("Invalid data submitted.");
+
+        try
+        {
+            var created = await _productService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { productId = created.ProductId }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("{productId:int}")]
+    public async Task<IActionResult> DeleteAsync(int productId)
+    {
+        try
+        {
+            var deleted = await _productService.DeleteAsync(productId);
+            if (!deleted) return NotFound("No product found.");
+            return Ok("Deleted successfully.");
         }
         catch (ArgumentException ex)
         {
