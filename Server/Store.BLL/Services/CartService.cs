@@ -1,40 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Store.BLL.DTOs.Cart;
+﻿using Store.BLL.DTOs.Cart;
 using Store.BLL.Interfaces;
+using Store.DAL.Interfaces;
 using Store.DAL.Models;
 
 namespace Store.BLL.Services;
 
 public class CartService : ICartService
 {
-    private readonly AppDbContext _context;
+    private readonly ICartRepository _cartRepository;
+    private readonly IProductRepository _productRepository;
 
-    public CartService(AppDbContext context)
+    public CartService(ICartRepository cartRepository, IProductRepository productRepository)
     {
-        _context = context;
+        _cartRepository = cartRepository;
+        _productRepository = productRepository;
     }
 
     public async Task<IEnumerable<CartDto>> GetCartAsync(int userId)
     {
-        return await _context.Carts
-            .Where(c => c.UserId == userId)
-            .Include(c => c.Product)
-            .Select(c => new CartDto
-            {
-                Id = c.Id,
-                ProductId = c.ProductId,
-                ProductName = c.Product.Name,
-                ProductImage = c.Product.Image,
-                ProductPrice = c.Product.Price ?? 0,
-                Quantity = c.Quantity
-            })
-            .ToListAsync();
+        EnsureValidUser(userId);
+        var cartItems = await _cartRepository.GetCartItemsWithProductAsync(userId);
+        return cartItems.Select(c => new CartDto
+        {
+            Id = c.Id,
+            ProductId = c.ProductId,
+            ProductName = c.Product.Name,
+            ProductImage = c.Product.Image,
+            ProductPrice = c.Product.Price ?? 0,
+            Quantity = c.Quantity
+        });
     }
 
     public async Task AddToCartAsync(int userId, AddToCartRequest request)
     {
-        var cartItem = await _context.Carts
-            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == request.ProductId);
+        EnsureValidUser(userId);
+        ValidateProductAndQuantity(request.ProductId, request.Quantity, allowZeroQuantity: false);
+
+        var product = await _productRepository.GetByIdAsync(request.ProductId);
+        if (product is null)
+            throw new ArgumentException("Sản phẩm không tồn tại hoặc đã ngừng bán.");
+
+        var cartItem = await _cartRepository.GetCartItemAsync(userId, request.ProductId);
 
         if (cartItem != null)
         {
@@ -42,7 +48,7 @@ public class CartService : ICartService
         }
         else
         {
-            _context.Carts.Add(new Cart
+            await _cartRepository.AddAsync(new Cart
             {
                 UserId = userId,
                 ProductId = request.ProductId,
@@ -50,13 +56,15 @@ public class CartService : ICartService
             });
         }
 
-        await _context.SaveChangesAsync();
+        await _cartRepository.SaveChangesAsync();
     }
 
     public async Task UpdateCartQuantityAsync(int userId, UpdateCartRequest request)
     {
-        var cartItem = await _context.Carts
-            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == request.ProductId);
+        EnsureValidUser(userId);
+        ValidateProductAndQuantity(request.ProductId, request.Quantity, allowZeroQuantity: true);
+
+        var cartItem = await _cartRepository.GetCartItemAsync(userId, request.ProductId);
 
         if (cartItem != null)
         {
@@ -66,32 +74,51 @@ public class CartService : ICartService
             }
             else
             {
-                _context.Carts.Remove(cartItem);
+                _cartRepository.Remove(cartItem);
             }
-            await _context.SaveChangesAsync();
+            await _cartRepository.SaveChangesAsync();
         }
     }
 
     public async Task RemoveFromCartAsync(int userId, int productId)
     {
-        var cartItem = await _context.Carts
-            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productId);
+        EnsureValidUser(userId);
+        if (productId <= 0) throw new ArgumentException("ProductId không hợp lệ.");
+
+        var cartItem = await _cartRepository.GetCartItemAsync(userId, productId);
 
         if (cartItem != null)
         {
-            _context.Carts.Remove(cartItem);
-            await _context.SaveChangesAsync();
+            _cartRepository.Remove(cartItem);
+            await _cartRepository.SaveChangesAsync();
         }
     }
 
     public async Task ClearCartAsync(int userId)
     {
-        var cartItems = await _context.Carts
-            .Where(c => c.UserId == userId)
-            .ToListAsync();
+        EnsureValidUser(userId);
+        var cartItems = await _cartRepository.GetCartItemsWithProductAsync(userId);
+        _cartRepository.RemoveRange(cartItems);
+        await _cartRepository.SaveChangesAsync();
+    }
 
-        _context.Carts.RemoveRange(cartItems);
-        await _context.SaveChangesAsync();
+    private static void EnsureValidUser(int userId)
+    {
+        if (userId <= 0)
+            throw new UnauthorizedAccessException("Invalid user.");
+    }
+
+    private static void ValidateProductAndQuantity(int productId, int quantity, bool allowZeroQuantity)
+    {
+        if (productId <= 0) throw new ArgumentException("ProductId không hợp lệ.");
+        if (allowZeroQuantity)
+        {
+            if (quantity < 0 || quantity > 999)
+                throw new ArgumentException("Quantity phải trong khoảng 0..999.");
+            return;
+        }
+
+        if (quantity <= 0 || quantity > 999)
+            throw new ArgumentException("Quantity phải trong khoảng 1..999.");
     }
 }
-

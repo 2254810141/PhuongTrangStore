@@ -1,4 +1,6 @@
-﻿namespace Store.BLL.DTOs.Cart;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Store.BLL.DTOs.Cart;
 
 public class CartDto
 {
@@ -12,13 +14,18 @@ public class CartDto
 
 public class AddToCartRequest
 {
+    [Range(1, int.MaxValue, ErrorMessage = "ProductId must be greater than 0.")]
     public int ProductId { get; set; }
+
+    [Range(1, 999, ErrorMessage = "Quantity must be between 1 and 999.")]
     public int Quantity { get; set; }
 }
 
 public class UpdateCartRequest
 {
+    [Range(1, int.MaxValue, ErrorMessage = "ProductId must be greater than 0.")]
     public int ProductId { get; set; }
+
+    [Range(0, 999, ErrorMessage = "Quantity must be between 0 and 999.")]
     public int Quantity { get; set; }
 }
-

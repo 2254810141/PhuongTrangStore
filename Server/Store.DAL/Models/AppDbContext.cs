@@ -60,6 +60,8 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.ProductId, "product_id");
 
+            entity.HasIndex(e => new { e.UserId, e.ProductId }, "uq_carts_user_product").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
