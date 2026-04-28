@@ -10,13 +10,20 @@ import ProductDetailPage from '../components/customerpage/ProductDetailPage'
 import SearchResultsPage from '../components/customerpage/SearchResultsPage'
 import CategoryPage from '../components/customerpage/CategoryPage'
 import BrandPage from '../components/customerpage/BrandPage'
+import CheckoutPage from '../components/customerpage/CheckoutPage'
+import ContactPage from '../components/customerpage/ContactPage'
+import OrderHistoryPage from '../components/customerpage/OrderHistoryPage'
+import OrderLookupPage from '../components/customerpage/OrderLookupPage'
 
 export default function StoreRoutes({
   cartCount,
   cartItems,
   onAddToCart,
   onRemoveItem,
+  onRemoveItems,
+  onRefreshCart,
   onUpdateQuantity,
+  onClearCart,
 }) {
   return (
     <Routes>
@@ -29,6 +36,20 @@ export default function StoreRoutes({
         <Route path="category/:id" element={<CategoryPage onAddToCart={onAddToCart} />} />
         <Route path="brand/:id" element={<BrandPage onAddToCart={onAddToCart} />} />
         <Route path="search" element={<SearchResultsPage onAddToCart={onAddToCart} />} />
+        <Route path="orders" element={<OrderHistoryPage />} />
+        <Route path="order-lookup" element={<OrderLookupPage />} />
+        <Route
+          path="checkout"
+          element={
+            <CheckoutPage
+              cartItems={cartItems}
+              onClearCart={onClearCart}
+              onRemoveItems={onRemoveItems}
+              onRefreshCart={onRefreshCart}
+            />
+          }
+        />
+        <Route path="contact" element={<ContactPage />} />
         <Route
           path="cart"
           element={

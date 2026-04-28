@@ -22,6 +22,7 @@ export function mapProductDto(item) {
   const price = Number(item.price ?? item.Price ?? 0)
   const isContactPrice = Boolean(item.isContactPrice ?? item.IsContactPrice)
   const isActive = item.isActive ?? item.IsActive ?? true
+  const description = item.description ?? item.Description ?? ''
 
   return {
     id: String(id ?? ''),
@@ -31,6 +32,7 @@ export function mapProductDto(item) {
     isContactPrice,
     isActive,
     categoryId: Number(categoryId ?? 0),
+    description,
     displayPrice: isContactPrice ? 'Liên hệ' : formatVnd(price),
   }
 }

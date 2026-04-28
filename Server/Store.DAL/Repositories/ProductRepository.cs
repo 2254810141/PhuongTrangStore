@@ -15,7 +15,7 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         return await _context.Products
-            .Where(p => p.IsActive != false)
+            .Where(p => p.IsActive == true)
             .ToListAsync();
     }
 
@@ -23,14 +23,14 @@ public class ProductRepository : IProductRepository
     {
         var key = keyword.Trim();
         return await _context.Products
-            .Where(p => p.IsActive != false && p.Name.Contains(key))
+            .Where(p => p.IsActive == true && p.Name.Contains(key))
             .ToListAsync();
     }
 
     public Task<Product?> GetByIdAsync(int productId)
     {
         return _context.Products
-            .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive != false);
+            .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive == true);
     }
 
     public async Task<Product> UpdateAsync(Product product)
@@ -50,7 +50,7 @@ public class ProductRepository : IProductRepository
     public async Task<bool> DeleteAsync(int productId)
     {
         var product = await _context.Products
-            .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive != false);
+            .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive == true);
 
         if (product is null) return false;
 

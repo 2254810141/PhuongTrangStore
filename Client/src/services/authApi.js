@@ -68,3 +68,23 @@ export async function registerUser(payload) {
   return response.json()
 }
 
+export async function logoutUser(refreshToken) {
+  if (!refreshToken) {
+    return null
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/User/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refreshToken }),
+  })
+
+  if (!response.ok) {
+    throw await parseApiError(response)
+  }
+
+  return null
+}
+

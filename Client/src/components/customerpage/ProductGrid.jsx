@@ -28,13 +28,22 @@ function ProductGrid({ products, onAddToCart = () => {} }) {
               >
                 Chi tiết
               </Link>
-              <button
-                type="button"
-                className="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
-                onClick={() => onAddToCart(product)}
-              >
-                Thêm giỏ
-              </button>
+              {product.isContactPrice ? (
+                <Link
+                  to="/contact"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-amber-600"
+                >
+                  Liên hệ
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+                  onClick={() => onAddToCart(product)}
+                >
+                  Thêm giỏ
+                </button>
+              )}
             </div>
           </div>
         </article>

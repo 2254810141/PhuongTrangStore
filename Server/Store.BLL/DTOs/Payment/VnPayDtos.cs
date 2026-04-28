@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Store.BLL.DTOs.Payment;
 
@@ -18,6 +19,8 @@ public class CheckoutVnPayRequest
 
     [Required]
     public string ShippingAddress { get; set; } = null!;
+
+    public List<int> SelectedProductIds { get; set; } = new();
 }
 
 public class CheckoutVnPayResultDto

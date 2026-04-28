@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Store.BLL.DTOs.Order;
 
@@ -18,6 +19,8 @@ public class CheckoutCodRequest
 
     [Required]
     public string ShippingAddress { get; set; } = null!;
+
+    public List<int> SelectedProductIds { get; set; } = new();
 }
 
 public class CheckoutItemRequest
@@ -63,6 +66,7 @@ public class OrderItemSummaryDto
 {
     public int ProductId { get; set; }
     public string ProductName { get; set; } = null!;
+    public string? ProductImage { get; set; }
     public decimal Price { get; set; }
     public int Quantity { get; set; }
 }
@@ -83,3 +87,12 @@ public class UpdateOrderStatusRequest
     [StringLength(50)]
     public string Status { get; set; } = null!;
 }
+
+public class OrderLookupRequest
+{
+    [Required]
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; } = null!;
+}
+

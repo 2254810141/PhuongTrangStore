@@ -15,14 +15,14 @@ public class BrandRepository : IBrandRepository
     public async Task<IEnumerable<Brand>> GetAllAsync()
     {
         return await _context.Brands
-            .Where(b => b.IsActive != false)
+            .Where(b => b.IsActive == true)
             .ToListAsync();
     }
 
     public Task<Brand?> GetByIdAsync(int id)
     {
         return _context.Brands
-            .FirstOrDefaultAsync(b => b.Id == id && b.IsActive != false);
+            .FirstOrDefaultAsync(b => b.Id == id && b.IsActive == true);
     }
 
     public async Task<Brand> CreateAsync(Brand brand)
@@ -43,7 +43,7 @@ public class BrandRepository : IBrandRepository
     public async Task<bool> DeleteAsync(int id)
     {
         var brand = await _context.Brands
-            .FirstOrDefaultAsync(b => b.Id == id && b.IsActive != false);
+            .FirstOrDefaultAsync(b => b.Id == id && b.IsActive == true);
 
         if (brand is null)
         {

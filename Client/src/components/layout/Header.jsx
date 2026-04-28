@@ -1,8 +1,10 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { categoryMenu } from '../../constants/menuCategories'
 import { getCategories } from '../../services/categoryApi'
 import { getBrands } from '../../services/brandApi'
+import useAuthSession from '../../hooks/useAuthSession'
+import { clearAuthSession } from '../../utils/authSession'
+import { logoutUser } from '../../services/authApi'
 
 const navLinks = [
   { label: 'Trang chủ', to: '/' },
@@ -13,9 +15,11 @@ function Header({ cartCount = 0 }) {
   const [openMobileMenu, setOpenMobileMenu] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(false)
   const [openBrandDropdown, setOpenBrandDropdown] = useState(false)
+  const [openAccountMenu, setOpenAccountMenu] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [categoryList, setCategoryList] = useState([])
   const [brandList, setBrandList] = useState([])
+  const { session } = useAuthSession()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -61,11 +65,26 @@ function Header({ cartCount = 0 }) {
   }
 
   const categoryCount = useMemo(
-    () => categoryMenu.reduce((sum, group) => sum + group.children.length, 0),
-    [],
+    () => categoryList.length,
+    [categoryList],
   )
 
   const brandCount = useMemo(() => brandList.length, [brandList])
+  const userName = session?.user?.fullName?.trim() || session?.user?.email || 'Tài khoản'
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(session?.refreshToken)
+    } catch {
+      // Ignore backend logout errors and still clear local session.
+    } finally {
+      clearAuthSession()
+    }
+
+    setOpenAccountMenu(false)
+    setOpenMobileMenu(false)
+    navigate('/')
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950 text-white shadow-panel">
@@ -112,28 +131,22 @@ function Header({ cartCount = 0 }) {
               {openDropdown && (
                 <div className="absolute left-0 top-full z-50 w-[780px] pt-2">
                   <div className="max-h-[70vh] overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900 p-4 shadow-xl">
-                    <div className="grid grid-cols-2 gap-4">
-                      {categoryMenu.map((group) => (
-                        <div key={group.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      {categoryList.length > 0 ? (
+                        categoryList.map((category) => (
                           <Link
-                            to={`/category/${group.id}`}
-                            className="mb-2 block text-sm font-bold uppercase tracking-wide text-red-400"
+                            key={category.id}
+                            to={`/category/${category.id}`}
+                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-300 transition hover:border-red-500 hover:text-white"
                           >
-                            {group.label}
+                            {category.name}
                           </Link>
-                          <div className="space-y-1">
-                            {group.children.map((child) => (
-                              <Link
-                                key={child.id}
-                                to={`/category/${child.id}`}
-                                className="block rounded px-2 py-1 text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-                              >
-                                {child.label}
-                              </Link>
-                            ))}
-                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-400">
+                          Chưa có danh mục nào.
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -202,12 +215,83 @@ function Header({ cartCount = 0 }) {
               )}
             </Link>
 
-            <Link
-              to="/login"
-              className="hidden whitespace-nowrap rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800 lg:inline-flex"
-            >
-              Đăng nhập
-            </Link>
+            <div className="relative hidden lg:block">
+              <button
+                type="button"
+                onClick={() => setOpenAccountMenu((prev) => !prev)}
+                className="inline-flex max-w-[220px] items-center gap-2 whitespace-nowrap rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+              >
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-xs font-black uppercase">
+                  {userName.charAt(0)}
+                </span>
+                <span className="truncate">{session ? userName : 'Tài khoản'}</span>
+              </button>
+
+              {openAccountMenu && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-zinc-800 bg-zinc-900 p-2 shadow-xl">
+                  {session ? (
+                    <>
+                      <div className="border-b border-zinc-800 px-3 py-2 text-sm">
+                        <p className="font-semibold text-white">{userName}</p>
+                        <p className="text-xs text-zinc-400">{session.user?.email}</p>
+                      </div>
+                      <Link
+                        to="/checkout"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Thanh toán
+                      </Link>
+                      <Link
+                        to="/orders"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Lịch sử đặt hàng
+                      </Link>
+                      <Link
+                        to="/contact"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Liên hệ
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-400 transition hover:bg-zinc-800"
+                      >
+                        Đăng xuất
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Đăng nhập
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Đăng ký
+                      </Link>
+                      <Link
+                        to="/contact"
+                        onClick={() => setOpenAccountMenu(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Liên hệ
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             <button
               type="button"
@@ -246,31 +330,96 @@ function Header({ cartCount = 0 }) {
             </div>
 
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+              <button
+                type="button"
+                onClick={() => setOpenAccountMenu((prev) => !prev)}
+                className="flex w-full items-center justify-between rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-100"
+              >
+                <span>{session ? userName : 'Tài khoản'}</span>
+                <span className="text-xs text-zinc-400">{session ? 'Đã đăng nhập' : 'Đăng nhập / Đăng ký'}</span>
+              </button>
+
+              {openAccountMenu && (
+                <div className="mt-3 space-y-1">
+                  {session ? (
+                    <>
+                      <Link
+                        to="/checkout"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Thanh toán
+                      </Link>
+                      <Link
+                        to="/orders"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Lịch sử đặt hàng
+                      </Link>
+                      <Link
+                        to="/contact"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Liên hệ
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="block w-full rounded bg-zinc-800 px-3 py-2 text-left text-sm text-red-400"
+                      >
+                        Đăng xuất
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Đăng nhập
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Đăng ký
+                      </Link>
+                      <Link
+                        to="/contact"
+                        onClick={() => setOpenMobileMenu(false)}
+                        className="block rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
+                      >
+                        Liên hệ
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
               <p className="mb-2 text-xs font-bold uppercase tracking-wide text-red-400">Danh mục nổi bật</p>
               <div className="grid max-h-44 grid-cols-2 gap-2 overflow-y-auto pr-1">
-                {categoryList.length > 0
-                  ? categoryList.map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/category/${category.id}`}
-                        onClick={() => setOpenMobileMenu(false)}
-                        className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-200"
-                      >
-                        {category.name}
-                      </Link>
-                    ))
-                  : categoryMenu.flatMap((group) =>
-                      group.children.map((child) => (
-                        <Link
-                          key={child.id}
-                          to={`/category/${child.id}`}
-                          onClick={() => setOpenMobileMenu(false)}
-                          className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-200"
-                        >
-                          {child.label}
-                        </Link>
-                      )),
-                    )}
+                {categoryList.length > 0 ? (
+                  categoryList.map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/category/${category.id}`}
+                      onClick={() => setOpenMobileMenu(false)}
+                      className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-200"
+                    >
+                      {category.name}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="col-span-full rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-400">
+                    Chưa có danh mục nào.
+                  </div>
+                )}
               </div>
             </div>
 

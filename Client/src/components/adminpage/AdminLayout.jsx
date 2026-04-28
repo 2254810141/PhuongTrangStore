@@ -1,6 +1,7 @@
 ﻿import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { clearAuthSession } from '../../utils/authSession'
 import useAuthSession from '../../hooks/useAuthSession'
+import { logoutUser } from '../../services/authApi'
 
 const navItems = [
   { label: 'Quản lý Sản phẩm', to: '/admin/products' },
@@ -12,8 +13,15 @@ function AdminLayout() {
   const navigate = useNavigate()
   const { session } = useAuthSession()
 
-  const handleLogout = () => {
-    clearAuthSession()
+  const handleLogout = async () => {
+    try {
+      await logoutUser(session?.refreshToken)
+    } catch {
+      // Ignore backend logout errors and still clear local session.
+    } finally {
+      clearAuthSession()
+    }
+
     navigate('/admin/login', { replace: true })
   }
 

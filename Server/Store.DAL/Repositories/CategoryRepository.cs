@@ -16,14 +16,14 @@ public class CategoryRepository : IcategoryRepository
     public async Task<IEnumerable<Category>> GetAllCategories()
     {
         return await _context.Categories
-            .Where(c => c.IsActive != false)
+            .Where(c => c.IsActive == true)
             .ToListAsync();
     }
 
     public Task<Category?> GetCategoryById(int id)
     {
         return _context.Categories
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive != false);
+            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive == true);
     }
 
     public async Task<Category> CreateAsync(Category category)
@@ -44,7 +44,7 @@ public class CategoryRepository : IcategoryRepository
     public async Task<bool> DeleteAsync(int id)
     {
         var category = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive != false);
+            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive == true);
 
         if (category is null)
         {

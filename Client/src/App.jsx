@@ -4,7 +4,16 @@ import AdminRoutes from './routes/AdminRoutes'
 import useCart from './hooks/useCart'
 
 function App() {
-  const { cartItems, cartCount, handleAddToCart, handleRemoveItem, handleUpdateQuantity } = useCart()
+  const {
+    cartItems,
+    cartCount,
+    refreshCart,
+    handleAddToCart,
+    handleRemoveItem,
+    handleRemoveItems,
+    handleUpdateQuantity,
+    clearCart,
+  } = useCart()
 
   return (
     <Router>
@@ -13,7 +22,10 @@ function App() {
         cartItems={cartItems}
         onAddToCart={handleAddToCart}
         onRemoveItem={handleRemoveItem}
+        onRemoveItems={handleRemoveItems}
+        onRefreshCart={refreshCart}
         onUpdateQuantity={handleUpdateQuantity}
+        onClearCart={clearCart}
       />
       <AdminRoutes />
     </Router>

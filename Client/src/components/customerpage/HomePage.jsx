@@ -2,10 +2,11 @@
 import { Link } from 'react-router-dom'
 import { getProducts } from '../../services/productApi'
 import ProductGrid from './ProductGrid'
-import { categoryMenu } from '../../constants/menuCategories'
+import { getCategories } from '../../services/categoryApi'
 
 function HomePage({ onAddToCart = () => {} }) {
   const [featured, setFeatured] = useState([])
+  const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -13,13 +14,15 @@ function HomePage({ onAddToCart = () => {} }) {
 
     ;(async () => {
       try {
-        const data = await getProducts()
+        const [productData, categoryData] = await Promise.all([getProducts(), getCategories()])
         if (mounted) {
-          setFeatured(data.filter((item) => item.isActive).slice(0, 8))
+          setFeatured(productData.filter((item) => item.isActive).slice(0, 8))
+          setCategories(categoryData.filter((item) => item.isActive).slice(0, 6))
         }
       } catch {
         if (mounted) {
           setFeatured([])
+          setCategories([])
         }
       } finally {
         if (mounted) {
@@ -56,10 +59,10 @@ function HomePage({ onAddToCart = () => {} }) {
                 Xem tất cả sản phẩm
               </Link>
               <Link
-                to="/category/khoan-pin"
+                to="/products"
                 className="rounded-lg border border-zinc-700 px-5 py-3 text-sm font-bold text-zinc-100 transition hover:border-red-600 hover:text-red-400"
               >
-                Danh mục khoan pin
+                Xem danh mục
               </Link>
             </div>
 
@@ -71,18 +74,23 @@ function HomePage({ onAddToCart = () => {} }) {
           </div>
 
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-            <p className="text-xs uppercase tracking-widest text-zinc-500">Nhóm sản phẩm nổi bật</p>
+            <p className="text-xs uppercase tracking-widest text-zinc-500">Danh mục sản phẩm</p>
             <div className="mt-4 space-y-3">
-              {categoryMenu.map((group) => (
-                <Link
-                  key={group.id}
-                  to={`/category/${group.id}`}
-                  className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm transition hover:border-red-600"
-                >
-                  <span>{group.label}</span>
-                  <span className="text-xs text-zinc-500">{group.children.length} nhóm</span>
-                </Link>
-              ))}
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.id}`}
+                    className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm transition hover:border-red-600"
+                  >
+                    <span>{category.name}</span>
+                  </Link>
+                ))
+              ) : (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-500">
+                  Chưa có danh mục nào.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -93,7 +101,6 @@ function HomePage({ onAddToCart = () => {} }) {
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-red-600">Sản phẩm nổi bật</p>
             <h2 className="text-2xl font-black text-zinc-900">Bán chạy tại cửa hàng</h2>
-            <p className="text-sm text-zinc-500">Giá hiển thị theo backend: IsContactPrice sẽ hiển thị Liên hệ.</p>
           </div>
           <Link to="/products" className="text-sm font-semibold text-red-700 hover:text-red-800">
             Xem tất cả -&gt;

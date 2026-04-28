@@ -16,11 +16,8 @@ function Footer() {
           <Link to="/products" className="block hover:text-red-400">
             Tất cả sản phẩm
           </Link>
-          <Link to="/category/khoan-pin" className="block hover:text-red-400">
-            Dụng cụ dùng pin
-          </Link>
-          <Link to="/category/han-mig" className="block hover:text-red-400">
-            Máy hàn và cắt
+          <Link to="/contact" className="block hover:text-red-400">
+            Liên hệ tư vấn
           </Link>
         </div>
 

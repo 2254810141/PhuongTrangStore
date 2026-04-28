@@ -25,6 +25,13 @@ public class VnPayService : IVnPayService
 
     public string CreatePaymentUrl(VnPayCreatePaymentRequest request)
     {
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var createDate = TimeZoneInfo.ConvertTimeFromUtc(request.CreatedAt, timeZone);
+        var expireDate = TimeZoneInfo.ConvertTimeFromUtc(request.ExpireAt, timeZone);
+
+        var vnpCreateDate = createDate.ToString("yyyyMMddHHmmss");
+        var vnpExpireDate = expireDate.ToString("yyyyMMddHHmmss");
+        
         var vnpParams = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["vnp_Version"] = "2.1.0",
@@ -38,8 +45,8 @@ public class VnPayService : IVnPayService
             ["vnp_Locale"] = "vn",
             ["vnp_ReturnUrl"] = request.ReturnUrl,
             ["vnp_IpAddr"] = string.IsNullOrWhiteSpace(request.ClientIp) ? "127.0.0.1" : request.ClientIp,
-            ["vnp_CreateDate"] = request.CreatedAt.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture),
-            ["vnp_ExpireDate"] = request.ExpireAt.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)
+            ["vnp_CreateDate"] = vnpCreateDate,
+            ["vnp_ExpireDate"] = vnpExpireDate
         };
 
         var signData = BuildQueryString(vnpParams);

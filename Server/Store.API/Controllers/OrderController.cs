@@ -54,6 +54,21 @@ public class OrderController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
+    [HttpPost("lookup")]
+    public async Task<ActionResult<IEnumerable<OrderSummaryDto>>> LookupOrdersByEmailAsync([FromBody] OrderLookupRequest request)
+    {
+        try
+        {
+            var orders = await _orderService.LookupOrdersByEmailAsync(request.Email);
+            return Ok(orders);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [Authorize]
     [HttpPost("checkout/vnpay")]
     public async Task<ActionResult<CheckoutVnPayResultDto>> CheckoutVnPayAsync([FromBody] CheckoutVnPayRequest request)
@@ -99,6 +114,27 @@ public class OrderController : ControllerBase
         {
             var userId = GetUserId();
             var order = await _orderService.GetMyOrderByIdAsync(userId, orderId);
+            if (order is null) return NotFound();
+            return Ok(order);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize]
+    [HttpPatch("my/{orderId:int}/cancel")]
+    public async Task<ActionResult<OrderSummaryDto>> CancelMyOrderAsync(int orderId)
+    {
+        try
+        {
+            var userId = GetUserId();
+            var order = await _orderService.CancelMyOrderAsync(userId, orderId);
             if (order is null) return NotFound();
             return Ok(order);
         }

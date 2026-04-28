@@ -63,6 +63,17 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
     )
   }
 
+  if (!product.isActive) {
+    return (
+      <section className="container-app space-y-3 rounded-xl border border-zinc-200 bg-white p-6 text-zinc-600 shadow-sm">
+        <p>Sản phẩm này hiện không còn hoạt động.</p>
+        <Link to="/products" className="font-semibold text-red-700 hover:text-red-800">
+          Quay lại danh sách
+        </Link>
+      </section>
+    )
+  }
+
   return (
     <section className="container-app">
       <div className="grid gap-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-2 lg:p-6">
@@ -86,10 +97,7 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
         </div>
 
         <div className="space-y-5">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-red-600">Chi tiết sản phẩm</p>
-            <h1 className="mt-2 text-2xl font-black text-zinc-900">{product.name}</h1>
-          </div>
+          <h1 className="text-2xl font-black text-zinc-900">{product.name}</h1>
 
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
             <p className="text-sm text-zinc-500">Giá bán</p>
@@ -97,22 +105,8 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
             {product.isContactPrice && <p className="mt-2 text-sm text-zinc-500">Sản phẩm này báo giá theo liên hệ.</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-lg border border-zinc-200 p-3">
-              <p className="text-zinc-500">Mã sản phẩm</p>
-              <p className="font-semibold text-zinc-900">{product.id}</p>
-            </div>
-            <div className="rounded-lg border border-zinc-200 p-3">
-              <p className="text-zinc-500">Danh mục ID</p>
-              <p className="font-semibold text-zinc-900">{product.categoryId || 'Đang cập nhật'}</p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-600">
-            <p>
-              Phù hợp cho công việc sửa chữa, lắp đặt, cơ khí xây dựng. Vui lòng liên hệ để được tư vấn đúng công
-              suất và đầu máy phù hợp.
-            </p>
+          <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-600 leading-6">
+            <p>{product.description?.trim() || 'Chưa có mô tả cho sản phẩm này.'}</p>
           </div>
 
           <div className="flex gap-3">
@@ -122,13 +116,22 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
             >
               Quay lại
             </Link>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
-              onClick={() => onAddToCart(product)}
-            >
-              Thêm vào giỏ hàng
-            </button>
+            {product.isContactPrice ? (
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600"
+              >
+                Liên hệ
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+                onClick={() => onAddToCart(product)}
+              >
+                Thêm vào giỏ hàng
+              </button>
+            )}
           </div>
         </div>
       </div>

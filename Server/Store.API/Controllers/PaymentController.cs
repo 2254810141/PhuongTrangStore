@@ -29,7 +29,7 @@ public class PaymentController : ControllerBase
             return BadRequest(new
             {
                 success = false,
-                message = "Chữ ký VNPAY không hợp lệ."
+                message = "The VNPAY signature is invalid."
             });
         }
 
@@ -48,20 +48,28 @@ public class PaymentController : ControllerBase
         if (responseCode == "00")
         {
             var order = await _orderService.ConfirmVnPayOrderAsync(orderId);
+            return Redirect($"http://localhost:5173/orders?payment=success&orderId={orderId}");
+            /*
             return Ok(new
             {
                 success = true,
                 message = "Checkout Vnpay success",
                 order
             });
+            */
         }
 
+        await _orderService.MarkVnPayOrderFailedAsync(orderId);
+
+        return Redirect($"http://localhost:5173/orders?payment=failed&orderId={orderId}");
+        /*
         return Ok(new
         {
             success = false,
             message = "Checkout VNPAY failed or canceled.",
             orderId
         });
+        */
     }
 
     [HttpGet("vnpay-ipn")]
