@@ -51,7 +51,6 @@ public class UserService : IUserService
             Password = request.Password,
             Phone = request.Phone
         };
-
         return await CreateUserByRoleAsync(adminRequest, AdminRole);
     }
     
@@ -62,7 +61,6 @@ public class UserService : IUserService
         if (string.IsNullOrWhiteSpace(request.FullName)) throw new ArgumentException("The full name cannot be left blank.");
         if (string.IsNullOrWhiteSpace(request.Email)) throw new ArgumentException("The email cannot be left blank.");
         if (string.IsNullOrWhiteSpace(request.Password)) throw new ArgumentException("The password cannot be left blank.");
-        if (string.IsNullOrWhiteSpace(request.Phone)) throw new ArgumentException("The phone number cannot be left blank.");
 
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         
@@ -74,7 +72,7 @@ public class UserService : IUserService
             FullName = request.FullName.Trim(),
             Email = normalizedEmail,
             Password = HashPassword(request.Password),
-            Phone = request.Phone.Trim(),
+            Phone = request.Phone?.Trim(),
             Role = role
         };
 

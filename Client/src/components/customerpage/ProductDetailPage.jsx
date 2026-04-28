@@ -1,12 +1,12 @@
 ﻿import { useParams, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import '../../styles/ProductDetail.css'
 import { getProductById } from '../../services/productApi'
 
 function ProductDetailPage({ onAddToCart = () => {} }) {
   const { productId } = useParams()
   const [product, setProduct] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -16,6 +16,10 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
         const data = await getProductById(productId)
         if (isMounted) {
           setProduct(data)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Không thể tải chi tiết sản phẩm')
         }
       } finally {
         if (isMounted) {
@@ -31,97 +35,104 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
 
   if (isLoading) {
     return (
-      <main className="detail-page section">
-        <div className="container detail-card">
-          <p className="muted">Đang tải thông tin sản phẩm...</p>
-        </div>
-      </main>
+      <section className="container-app rounded-xl border border-zinc-200 bg-white p-8 text-zinc-500 shadow-sm">
+        Đang tải thông tin sản phẩm...
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="container-app space-y-3 rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <p>{error}</p>
+        <Link to="/products" className="font-semibold underline">
+          Quay lại danh sách
+        </Link>
+      </section>
     )
   }
 
   if (!product) {
     return (
-      <main className="detail-page section">
-        <div className="container detail-card">
-          <p className="muted">Không tìm thấy sản phẩm.</p>
-          <Link to="/products/laptop" className="ghost-btn">
-            Quay lại danh sách Laptop
-          </Link>
-        </div>
-      </main>
+      <section className="container-app space-y-3 rounded-xl border border-zinc-200 bg-white p-6 text-zinc-600 shadow-sm">
+        <p>Không tìm thấy sản phẩm.</p>
+        <Link to="/products" className="font-semibold text-red-700 hover:text-red-800">
+          Quay lại danh sách
+        </Link>
+      </section>
     )
   }
 
   return (
-    <main className="detail-page section">
-      <div className="container detail-layout">
-        <div className="detail-media-card">
-          <div className="detail-breadcrumb">
-            <Link to="/products/laptop">Laptop</Link>
-            <span>/</span>
-            <span>{product.name}</span>
+    <section className="container-app">
+      <div className="grid gap-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-2 lg:p-6">
+        <div className="space-y-4">
+          <div className="text-sm text-zinc-500">
+            <Link to="/products" className="font-medium text-zinc-600 hover:text-red-700">
+              Sản phẩm
+            </Link>{' '}
+            / <span className="text-zinc-900">{product.name}</span>
           </div>
 
-          {product.image ? (
-            <div className="detail-media">
-              <img src={product.image} alt={product.name} />
-            </div>
-          ) : (
-            <div className="detail-media detail-media--empty">No image</div>
-          )}
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
+            <img src={product.image} alt={product.name} className="h-80 w-full object-cover object-center" />
+          </div>
 
-          <div className="detail-feature-row">
-            <span className="detail-chip">Chính hãng 100%</span>
-            <span className="detail-chip">Bảo hành uy tín</span>
-            <span className="detail-chip">Giao nhanh toàn quốc</span>
+          <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+            <span className="rounded-full bg-zinc-100 px-3 py-1">Chính hãng</span>
+            <span className="rounded-full bg-zinc-100 px-3 py-1">Bảo hành uy tín</span>
+            <span className="rounded-full bg-zinc-100 px-3 py-1">Giao nhanh</span>
           </div>
         </div>
 
-        <div className="detail-info-card">
-          <p className="eyebrow">Laptop nổi bật</p>
-          <h1>{product.name}</h1>
-          <p className="muted detail-summary">{product.description}</p>
-
-          <div className="detail-price-block">
-            <span className="detail-price-label">Giá bán</span>
-            <div className="detail-price">{product.displayPrice}</div>
+        <div className="space-y-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-red-600">Chi tiết sản phẩm</p>
+            <h1 className="mt-2 text-2xl font-black text-zinc-900">{product.name}</h1>
           </div>
 
-          <div className="detail-meta-grid">
-            <div className="detail-meta-item">
-              <span>Tồn kho</span>
-              <strong>{product.stockQuantity}</strong>
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+            <p className="text-sm text-zinc-500">Giá bán</p>
+            <div className="mt-1 text-3xl font-black text-red-700">{product.displayPrice}</div>
+            {product.isContactPrice && <p className="mt-2 text-sm text-zinc-500">Sản phẩm này báo giá theo liên hệ.</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-lg border border-zinc-200 p-3">
+              <p className="text-zinc-500">Mã sản phẩm</p>
+              <p className="font-semibold text-zinc-900">{product.id}</p>
             </div>
-            <div className="detail-meta-item">
-              <span>Trạng thái</span>
-              <strong>{product.isActive ? 'Đang kinh doanh' : 'Tạm ngừng'}</strong>
+            <div className="rounded-lg border border-zinc-200 p-3">
+              <p className="text-zinc-500">Danh mục ID</p>
+              <p className="font-semibold text-zinc-900">{product.categoryId || 'Đang cập nhật'}</p>
             </div>
           </div>
 
-          <div className="detail-section">
-            <h3>Thông số chính</h3>
-            <ul className="detail-specs">
-              {product.specs.map((spec) => (
-                <li key={spec}>{spec}</li>
-              ))}
-            </ul>
+          <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-600">
+            <p>
+              Phù hợp cho công việc sửa chữa, lắp đặt, cơ khí xây dựng. Vui lòng liên hệ để được tư vấn đúng công
+              suất và đầu máy phù hợp.
+            </p>
           </div>
 
-          <div className="detail-actions">
-            <Link to="/products/laptop" className="ghost-btn">
-              Quay lại danh sách
+          <div className="flex gap-3">
+            <Link
+              to="/products"
+              className="inline-flex items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100"
+            >
+              Quay lại
             </Link>
             <button
               type="button"
-              className="primary-btn"
-              onClick={() => onAddToCart({ id: product.id, name: product.name, price: product.price })}
+              className="inline-flex items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+              onClick={() => onAddToCart(product)}
             >
-              Thêm vào giỏ
+              Thêm vào giỏ hàng
             </button>
           </div>
         </div>
       </div>
-    </main>
+    </section>
   )
 }
 

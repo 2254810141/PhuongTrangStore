@@ -1,0 +1,8 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <rect width="800" height="600" fill="#18181b"/>
+  <rect x="40" y="40" width="720" height="520" rx="16" fill="#27272a" stroke="#3f3f46"/>
+  <path d="M280 330L360 250L430 320L490 260L620 400H180L280 330Z" fill="#52525b"/>
+  <circle cx="290" cy="210" r="34" fill="#71717a"/>
+  <text x="400" y="470" text-anchor="middle" fill="#a1a1aa" font-size="30" font-family="Segoe UI, sans-serif">PhuongTrang Store</text>
+</svg>
+

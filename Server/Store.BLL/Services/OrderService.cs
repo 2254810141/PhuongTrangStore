@@ -2,17 +2,23 @@
 using Store.BLL.Interfaces;
 using Store.DAL.Interfaces;
 using Store.DAL.Models;
+using Microsoft.Extensions.Configuration;
+using Store.BLL.DTOs.Payment;
 
 namespace Store.BLL.Services;
 
 public class OrderService : IOrderService
 {
     private const string ShipCodMethod = "shipcod";
+    private const string VnPayMethod = "vnpay";
     private const string PendingConfirmStatus = "pending_confirm";
+    private const string PendingPaymentStatus = "pending_payment";
+    private const string ConfirmedStatus = "confirmed";
 
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
         "pending_confirm",
+        "pending_payment",
         "confirmed",
         "shipping",
         "delivered",
@@ -21,11 +27,21 @@ public class OrderService : IOrderService
 
     private readonly ICartRepository _cartRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly IVnPayService _vnPayService;
+    private readonly string _vnpayReturnUrl;
 
-    public OrderService(ICartRepository cartRepository, IOrderRepository orderRepository)
+    public OrderService(ICartRepository cartRepository,
+        IOrderRepository orderRepository,
+        IVnPayService vnPayService,
+        IConfiguration configuration)
+
     {
         _cartRepository = cartRepository;
         _orderRepository = orderRepository;
+        _vnPayService = vnPayService;
+
+        _vnpayReturnUrl = configuration["VnPay:ReturnUrl"]
+                          ?? throw new InvalidOperationException("VnPay:ReturnUrl is missing.");
     }
 
     public async Task<CheckoutResultDto> CheckoutCodAsync(int userId, CheckoutCodRequest request)
@@ -176,6 +192,105 @@ public class OrderService : IOrderService
         await _orderRepository.SaveChangesAsync();
     }
 
+public async Task<CheckoutVnPayResultDto> CheckoutVnPayAsync(int userId, CheckoutVnPayRequest request, string? clientIp)
+    {
+        if (userId <= 0) throw new UnauthorizedAccessException("Invalid user.");
+        ValidateCustomerInfo(request.CustomerName, request.CustomerPhone, request.ShippingAddress);
+    
+        var cartItems = await _cartRepository.GetCartItemsWithProductAsync(userId);
+    
+        if (cartItems.Count == 0)
+            throw new ArgumentException("Giỏ hàng trống.");
+    
+        ValidateCartItems(cartItems.Select(c => (c.ProductId, c.Quantity, c.Product)).ToList());
+    
+        var now = DateTime.UtcNow;
+        var expiresAt = now.AddMinutes(15);
+    
+        var order = new Order
+        {
+            UserId = userId,
+            CustomerName = request.CustomerName.Trim(),
+            CustomerPhone = request.CustomerPhone.Trim(),
+            CustomerEmail = string.IsNullOrWhiteSpace(request.CustomerEmail) ? null : request.CustomerEmail.Trim(),
+            ShippingAddress = request.ShippingAddress.Trim(),
+            PaymentMethod = VnPayMethod,
+            Status = PendingPaymentStatus,
+            TotalAmount = cartItems.Sum(c => (c.Product.Price ?? 0m) * c.Quantity),
+            CreatedAt = now
+        };
+    
+        var orderItems = cartItems.Select(c => new OrderItem
+        {
+            ProductId = c.ProductId,
+            Quantity = c.Quantity,
+            Price = c.Product.Price ?? 0m
+        }).ToList();
+    
+        await _orderRepository.CreateOrderWithItemsAsync(order, orderItems);
+    
+        var paymentUrl = _vnPayService.CreatePaymentUrl(new VnPayCreatePaymentRequest
+        {
+            OrderId = order.Id,
+            Amount = order.TotalAmount ?? 0m,
+            OrderInfo = $"Thanh toán đơn hàng #{order.Id}",
+            ClientIp = clientIp ?? "127.0.0.1",
+            ReturnUrl = _vnpayReturnUrl,
+            CreatedAt = now,
+            ExpireAt = expiresAt
+        });
+    
+        return new CheckoutVnPayResultDto
+        {
+            OrderId = order.Id,
+            TotalAmount = order.TotalAmount ?? 0m,
+            PaymentMethod = VnPayMethod,
+            Status = PendingPaymentStatus,
+            PaymentUrl = paymentUrl,
+            CreatedAt = now,
+            ExpiresAt = expiresAt
+        };
+    }
+public async Task<OrderSummaryDto?> ConfirmVnPayOrderAsync(int orderId)
+    {
+        if (orderId <= 0) throw new ArgumentException("OrderId không hợp lệ.");
+    
+        var order = await _orderRepository.GetOrderWithItemsAsync(orderId);
+        if (order is null)
+            return null;
+    
+        if (!string.Equals(order.PaymentMethod, VnPayMethod, StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("Đơn hàng này không phải thanh toán bằng VNPAY.");
+    
+        if (string.Equals(order.Status, ConfirmedStatus, StringComparison.OrdinalIgnoreCase))
+            return MapOrderSummary(order);
+    
+        order.Status = ConfirmedStatus;
+        await _orderRepository.SaveChangesAsync();
+    
+        if (order.UserId.HasValue)
+        {
+            var cartItems = await _cartRepository.GetCartItemsWithProductAsync(order.UserId.Value);
+    
+            var orderProductIds = order.OrderItems
+                .Where(x => x.ProductId.HasValue)
+                .Select(x => x.ProductId!.Value)
+                .ToHashSet();
+    
+            var cartsToRemove = cartItems
+                .Where(c => orderProductIds.Contains(c.ProductId))
+                .ToList();
+    
+            if (cartsToRemove.Count > 0)
+            {
+                _cartRepository.RemoveRange(cartsToRemove);
+                await _cartRepository.SaveChangesAsync();
+            }
+        }
+    
+        return MapOrderSummary(order);
+    }
+    
     private static void ValidateCustomerInfo(string? customerName, string? customerPhone, string? shippingAddress)
     {
         if (string.IsNullOrWhiteSpace(customerName))

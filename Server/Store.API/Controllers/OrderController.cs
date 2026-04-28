@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Store.BLL.DTOs.Order;
 using Store.BLL.Interfaces;
+using Store.BLL.DTOs.Payment;
 
 namespace Store.API.Controllers;
 
@@ -46,6 +47,27 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.CheckoutCodGuestAsync(request);
             return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize]
+    [HttpPost("checkout/vnpay")]
+    public async Task<ActionResult<CheckoutVnPayResultDto>> CheckoutVnPayAsync([FromBody] CheckoutVnPayRequest request)
+    {
+        try
+        {
+            var userId = GetUserId();
+            var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var result = await _orderService.CheckoutVnPayAsync(userId, request, clientIp);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
         }
         catch (ArgumentException ex)
         {

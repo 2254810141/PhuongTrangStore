@@ -22,6 +22,7 @@ public class UserController : ControllerBase
             try
             {
                 var createdUser = await _userService.CreateAsync(request);
+                
                 return StatusCode(StatusCodes.Status201Created, createdUser);
             }
             catch (ArgumentException ex)

@@ -27,6 +27,26 @@
   text-align: center;
 }
 
+.auth-error,
+.auth-success {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.auth-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.auth-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -99,6 +119,11 @@
 
 .auth-submit:hover {
   filter: brightness(1.03);
+}
+
+.auth-submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
 }
 
 .auth-alt {

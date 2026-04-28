@@ -1,146 +1,112 @@
-﻿import heroImg from '../../assets/DellInspiron15.jpg'
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import '../../styles/HomePage.css'
 import { getProducts } from '../../services/productApi'
+import ProductGrid from './ProductGrid'
+import { categoryMenu } from '../../constants/menuCategories'
 
-const categories = [
-  {
-    title: 'Gaming hiệu năng cao',
-    text: 'Tản nhiệt tối ưu, màn 240Hz, hỗ trợ nâng cấp RAM/SSD.',
-    badge: '-12% tuần này',
-  },
-  {
-    title: 'Học tập & văn phòng',
-    text: 'Mỏng nhẹ dưới 1.3kg, pin trọn ngày, sạc nhanh 65W.',
-    badge: 'Quà 1 triệu',
-  },
-  {
-    title: 'Đồ họa & 3D',
-    text: 'Màn chuẩn màu, NVIDIA Studio, RAM 32GB cho project nặng.',
-    badge: 'Cấu hình đề xuất',
-  },
-]
-
-function HomePage() {
+function HomePage({ onAddToCart = () => {} }) {
   const [featured, setFeatured] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    let isMounted = true
+    let mounted = true
 
     ;(async () => {
       try {
         const data = await getProducts()
-        if (isMounted) {
-          setFeatured(data.filter((item) => item.isActive).slice(0, 3))
+        if (mounted) {
+          setFeatured(data.filter((item) => item.isActive).slice(0, 8))
         }
       } catch {
-        if (isMounted) {
+        if (mounted) {
           setFeatured([])
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
         }
       }
     })()
 
     return () => {
-      isMounted = false
+      mounted = false
     }
   }, [])
 
   return (
-    <div className="home-page">
-      <section className="hero-section" id="top">
-        <div className="container hero__grid">
-          <div className="hero__copy">
-            <div className="pill">Laptop mới 2025</div>
-            <h1>Trải nghiệm laptop mạnh mẽ cho công việc, học tập và gaming</h1>
-            <p className="lede">
-              Chọn cấu hình tối ưu, giao siêu tốc, bảo hành chính hãng. Đội ngũ tư vấn giúp bạn tìm chiếc
-              laptop phù hợp nhất trong vài phút.
+    <div className="space-y-10">
+      <section className="container-app overflow-hidden rounded-2xl bg-zinc-950 text-white shadow-panel">
+        <div className="grid gap-8 bg-brand-grid bg-grid p-8 lg:grid-cols-2 lg:p-10">
+          <div className="space-y-5">
+            <span className="inline-flex rounded-full border border-red-700 bg-red-900/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-red-300">
+              PhươngTrang Store
+            </span>
+            <h1 className="text-3xl font-black leading-tight text-white lg:text-4xl">
+              Dụng cụ cầm tay và thiết bị cơ khí chính hãng cho thợ chuyên nghiệp
+            </h1>
+            <p className="text-sm text-zinc-300 lg:text-base">
+              Chuyên DCK, DCA, Weldcom... giá cạnh tranh, hỗ trợ kỹ thuật, giao nhanh toàn quốc.
             </p>
-            <div className="hero__actions">
-              <Link className="primary-btn" to="/products/laptop">
-                Xem danh sách
-              </Link>
-              <Link className="ghost-btn" to="/accessories">
-                Xem phụ kiện
-              </Link>
-            </div>
-            <div className="hero__meta">
-              <span>Miễn phí cài đặt & vệ sinh định kỳ</span>
-              <span>Giá đã bao gồm VAT</span>
-            </div>
-          </div>
-          <div className="hero__visual">
-            <div className="hero__card">
-              <img src={heroImg} alt="Laptop cao cap" />
-              <div className="hero__floating">Giảm đến 3.000.000₫ + quà tặng</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="section" id="laptops">
-        <div className="container section__header">
-          <div>
-            <p className="eyebrow">Sẵn hàng hôm nay</p>
-            <h2>Top lựa chọn nổi bật</h2>
-            <p className="muted">Đã tinh chỉnh cấu hình, tản nhiệt và bảo hành để sẵn sàng sử dụng.</p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/products"
+                className="rounded-lg bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-800"
+              >
+                Xem tất cả sản phẩm
+              </Link>
+              <Link
+                to="/category/khoan-pin"
+                className="rounded-lg border border-zinc-700 px-5 py-3 text-sm font-bold text-zinc-100 transition hover:border-red-600 hover:text-red-400"
+              >
+                Danh mục khoan pin
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 text-xs text-zinc-400 sm:grid-cols-3">
+              <div>Hàng chính hãng có hóa đơn VAT</div>
+              <div>Tư vấn đúng máy theo nhu cầu</div>
+              <div>Hỗ trợ bảo hành nhanh</div>
+            </div>
           </div>
-          <Link className="link" to="/accessories">
-            Xem thêm phụ kiện →
-          </Link>
-        </div>
-        <div className="container card-grid">
-          {featured.map((item) => (
-            <article className="product-card" key={item.name}>
-              <div className="product-card__top">
-                <span className="pill pill--soft">{item.badge}</span>
-                <span className="price">{item.displayPrice}</span>
-              </div>
-              {item.image && <img src={item.image} alt={item.name} />}
-              <h3>{item.name}</h3>
-              <p className="muted">{item.description}</p>
-              <ul className="spec-list">
-                {item.specs.map((spec) => (
-                  <li key={spec}>{spec}</li>
-                ))}
-              </ul>
-              <div className="product-card__footer">
-                <Link to={`/products/${item.id}`} className="ghost-btn">
-                  Xem
+
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+            <p className="text-xs uppercase tracking-widest text-zinc-500">Nhóm sản phẩm nổi bật</p>
+            <div className="mt-4 space-y-3">
+              {categoryMenu.map((group) => (
+                <Link
+                  key={group.id}
+                  to={`/category/${group.id}`}
+                  className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm transition hover:border-red-600"
+                >
+                  <span>{group.label}</span>
+                  <span className="text-xs text-zinc-500">{group.children.length} nhóm</span>
                 </Link>
-                <button type="button" className="primary-btn">
-                  Thêm vào giỏ
-                </button>
-              </div>
-            </article>
-          ))}
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="section section--muted" id="accessories">
-        <div className="container section__header">
+      <section className="container-app space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="eyebrow">Danh mục</p>
-            <h2>Chọn theo nhu cầu</h2>
-            <p className="muted">Mọi thứ từ gaming, văn phòng đến đồ họa chuyên nghiệp.</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-red-600">Sản phẩm nổi bật</p>
+            <h2 className="text-2xl font-black text-zinc-900">Bán chạy tại cửa hàng</h2>
+            <p className="text-sm text-zinc-500">Giá hiển thị theo backend: IsContactPrice sẽ hiển thị Liên hệ.</p>
           </div>
-          <Link className="link" to="/accessories">
-            Xem phụ kiện hot →
+          <Link to="/products" className="text-sm font-semibold text-red-700 hover:text-red-800">
+            Xem tất cả -&gt;
           </Link>
         </div>
-        <div className="container category-grid">
-          {categories.map((cat) => (
-            <article className="category-card" key={cat.title}>
-              <div className="pill pill--soft">{cat.badge}</div>
-              <h3>{cat.title}</h3>
-              <p className="muted">{cat.text}</p>
-              <Link className="link" to="/products/laptop">
-                Xem gợi ý
-              </Link>
-            </article>
-          ))}
-        </div>
+
+        {isLoading ? (
+          <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 shadow-sm">
+            Đang tải sản phẩm...
+          </div>
+        ) : (
+          <ProductGrid products={featured} onAddToCart={onAddToCart} />
+        )}
       </section>
 
     </div>

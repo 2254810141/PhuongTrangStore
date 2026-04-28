@@ -50,7 +50,10 @@ public class ProductService : IProductService
         product.Price = request.Price;
         product.IsContactPrice = request.IsContactPrice;
         product.IsActive = request.IsActive;
-        product.Image = request.Image;
+        if (!string.IsNullOrWhiteSpace(request.Image))
+        {
+            product.Image = request.Image;
+        }
         product.Description = request.Description;
 
         var updated = await _productRepository.UpdateAsync(product);
