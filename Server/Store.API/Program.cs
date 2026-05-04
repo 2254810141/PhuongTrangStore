@@ -2,6 +2,7 @@
 using Store.DAL.Models;
 using Store.BLL.Interfaces;
 using Store.BLL.Services;
+using Store.BLL.Hubs;
 using Store.DAL.Interfaces;
 using Store.DAL.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,7 +20,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString),
+        mysqlOptions => mysqlOptions.MigrationsAssembly("Store.DAL"))
 );
 
 builder.Services.AddCors(options =>
@@ -33,7 +37,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:5175",
                 "https://localhost:5175")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -67,12 +72,14 @@ builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<ICloudinaryUploadService, CloudinaryUploadService>();
 
-
+builder.Services.AddSignalR();
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -108,5 +115,6 @@ app.UseCors("ClientPolicy");
 app.UseAuthentication();
 app.UseAuthorization(); 
 app.MapControllers();
+app.MapHub<OrderNotificationHub>("/hubs/order-notification");
 
 app.Run();

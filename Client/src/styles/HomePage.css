@@ -58,13 +58,13 @@
   position: absolute;
   right: 16px;
   top: 16px;
-  background: #0f172a;
+  background: #92400e;
   color: #fff;
   padding: 8px 14px;
   border-radius: 12px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 26px rgba(120, 53, 15, 0.2);
 }
 
 .section {
@@ -182,7 +182,7 @@
 }
 
 .category-card {
-  background: linear-gradient(160deg, #f8fbff, #f1f5ff);
+  background: linear-gradient(160deg, #fef3c7, #fde68a);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 18px;
@@ -226,7 +226,7 @@
   padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: #f8fafc;
+  background: #fef3c7;
 }
 
 @media (max-width: 900px) {

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProductGrid from './ProductGrid'
 import { getProducts } from '../../services/productApi'
@@ -67,7 +67,7 @@ function CategoryPage({ onAddToCart = () => {} }) {
 
   return (
     <section className="container-app space-y-5">
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-amber-300 bg-amber-200 p-5 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-widest text-red-600">Danh mục</p>
         <h1 className="mt-2 text-2xl font-bold text-zinc-900">{title}</h1>
         <p className="mt-2 text-sm text-zinc-500">Tìm thấy {products.length} sản phẩm đang kinh doanh.</p>

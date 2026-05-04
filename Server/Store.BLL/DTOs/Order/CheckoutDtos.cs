@@ -81,6 +81,19 @@ public class OrderSummaryDto
     public List<OrderItemSummaryDto> Items { get; set; } = new();
 }
 
+public class OrderRespondDto
+{
+    public int OrderId { get; set; }
+    public string CustomerName { get; set; } = null!;
+    public string CustomerPhone { get; set; } = null!;
+    public string? CustomerEmail { get; set; }
+    public string ShippingAddress { get; set; } = null!;
+    public decimal TotalAmount { get; set; }
+    public string PaymentMethod { get; set; } = null!;
+    public string Status { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
+    public List<OrderItemSummaryDto> Items { get; set; } = new();
+}
 public class UpdateOrderStatusRequest
 {
     [Required]

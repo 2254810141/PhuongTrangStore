@@ -20,6 +20,11 @@ public class OrderRepository : IOrderRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Order>> GetOrdersAsync()
+    {
+        return await _context.Orders.ToListAsync();
+    }
+
     public async Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> productIds)
     {
         var ids = productIds.Distinct().ToList();
@@ -108,6 +113,8 @@ public class OrderRepository : IOrderRepository
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
     }
+    
+    
 
     public async Task<Order?> GetOrderWithItemsAsync(int orderId)
     {
@@ -116,6 +123,7 @@ public class OrderRepository : IOrderRepository
                 .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(o => o.Id == orderId);
     }
+    
 
     public async Task<Order?> GetOrderWithItemsByUserIdAsync(int orderId, int userId)
     {

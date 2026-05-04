@@ -126,7 +126,20 @@ public class OrderController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
+    [Authorize(Roles = "admin")]
+    [HttpPatch("{orderId:int}/cancel")]
+    public async Task<ActionResult<OrderRespondDto>> AdminCancelOrderAsync(int orderId)
+    {
+        try
+        {
+            var order = await _orderService.AdminCancelOrderAsync(orderId);
+            return order is null ? NotFound() : Ok(order);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     [Authorize]
     [HttpPatch("my/{orderId:int}/cancel")]
     public async Task<ActionResult<OrderSummaryDto>> CancelMyOrderAsync(int orderId)
@@ -165,6 +178,13 @@ public class OrderController : ControllerBase
     }
 
     [Authorize(Roles = "admin")]
+    [HttpGet]
+    public async Task<ActionResult<OrderRespondDto>> GetOrderAsync()
+    {
+        var orders = await _orderService.GetOrdersAsync();
+        return Ok(orders); 
+    }
+    [Authorize(Roles = "admin")]
     [HttpPatch("{orderId:int}/status")]
     public async Task<IActionResult> UpdateOrderStatusAsync(int orderId, [FromBody] UpdateOrderStatusRequest request)
     {
@@ -178,7 +198,7 @@ public class OrderController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
+    
     private int GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)

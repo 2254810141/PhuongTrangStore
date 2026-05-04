@@ -4,3 +4,4 @@ obj/
 *.sln.DotSettings.user
 *.DotSettings.user
 Server/Store.API/appsettings.json
+tempbuild/

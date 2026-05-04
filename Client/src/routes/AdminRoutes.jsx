@@ -1,4 +1,4 @@
-﻿import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import useAuthSession from '../hooks/useAuthSession'
 import AdminLayout from '../components/adminpage/AdminLayout'
 import AdminLoginPage from '../components/adminpage/AdminLoginPage'
@@ -6,6 +6,7 @@ import AdminRegisterPage from '../components/adminpage/AdminRegisterPage'
 import AdminProductPage from '../components/adminpage/AdminProductPage'
 import AdminCategoryPage from '../components/adminpage/AdminCategoryPage'
 import AdminBrandPage from '../components/adminpage/AdminBrandPage'
+import AdminOrderPage from '../components/adminpage/AdminOrderPage'
 
 function RequireAdmin({ children }) {
   const location = useLocation()
@@ -60,6 +61,7 @@ function AdminRoutes() {
         <Route path="products" element={<AdminProductPage />} />
         <Route path="categories" element={<AdminCategoryPage />} />
         <Route path="brands" element={<AdminBrandPage />} />
+        <Route path="orders" element={<AdminOrderPage />} />
       </Route>
     
       <Route path="*" element={null} />

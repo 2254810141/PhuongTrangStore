@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+import axios from 'axios'
 import { getAuthSession } from '../utils/authSession'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5026'
@@ -269,6 +269,88 @@ export async function deleteAdminBrand(id) {
       url: `/api/Brand/${id}`,
     },
     'Không thể xóa thương hiệu',
+  )
+}
+
+function mapOrder(item) {
+  return {
+    id: String(item.id ?? item.Id ?? item.orderId ?? item.OrderId ?? ''),
+    orderCode: item.orderCode ?? item.OrderCode ?? '',
+    customerName: item.customerName ?? item.CustomerName ?? item.fullName ?? item.FullName ?? 'Khách hàng',
+    customerEmail: item.customerEmail ?? item.CustomerEmail ?? item.email ?? item.Email ?? '',
+    customerPhone: item.customerPhone ?? item.CustomerPhone ?? item.phone ?? item.Phone ?? '',
+    totalAmount: item.totalAmount ?? item.TotalAmount ?? 0,
+    status: item.status ?? item.Status ?? 'Pending',
+    paymentMethod: item.paymentMethod ?? item.PaymentMethod ?? 'COD',
+    paymentStatus: item.paymentStatus ?? item.PaymentStatus ?? 'Pending',
+    shippingAddress: item.shippingAddress ?? item.ShippingAddress ?? '',
+    createdAt: item.createdAt ?? item.CreatedAt ?? item.orderDate ?? item.OrderDate ?? '',
+    items: item.items ?? item.Items ?? item.orderItems ?? item.OrderItems ?? [],
+  }
+}
+
+export async function getAdminOrders() {
+  const data = await request(
+    {
+      method: 'get',
+      url: '/api/Order',
+    },
+    'Không thể tải danh sách đơn hàng',
+  )
+
+  return Array.isArray(data) ? data.map(mapOrder) : []
+}
+
+export async function getAdminOrderById(orderId) {
+  const data = await request(
+    {
+      method: 'get',
+      url: `/api/Order/${orderId}`,
+    },
+    'Không thể tải thông tin đơn hàng',
+  )
+
+  return data ? mapOrder(data) : null
+}
+
+export async function updateAdminOrderStatus(orderId, status) {
+  return request(
+    {
+      method: 'patch',
+      url: `/api/Order/${orderId}/status`,
+      data: { status },
+    },
+    'Không thể cập nhật trạng thái đơn hàng',
+  )
+}
+
+export async function cancelAdminOrder(orderId) {
+  return request(
+    {
+      method: 'patch',
+      url: `/api/Order/${orderId}/cancel`,
+    },
+    'Không thể hủy đơn hàng',
+  )
+}
+
+export async function getUnreadNotifications() {
+  return request(
+    {
+      method: 'get',
+      url: '/api/notifications/unread',
+    },
+    'Không thể tải thông báo',
+  )
+}
+
+export async function markNotificationAsRead(id) {
+  return request(
+    {
+      method: 'post',
+      url: id ? `/api/notifications/mark-as-read/${id}` : '/api/notifications/mark-as-read',
+    },
+    'Không thể cập nhật trạng thái thông báo',
   )
 }
 

@@ -23,7 +23,7 @@ const statusClassMap = {
   confirmed: 'bg-emerald-100 text-emerald-700',
   shipping: 'bg-sky-100 text-sky-700',
   delivered: 'bg-emerald-100 text-emerald-700',
-  cancelled: 'bg-red-100 text-red-700',
+  cancelled: 'bg-amber-100 text-amber-700',
   expired: 'bg-zinc-100 text-zinc-600',
 }
 
@@ -72,7 +72,7 @@ function OrderHistoryPage() {
       showCancelButton: true,
       confirmButtonText: 'Hủy đơn',
       cancelButtonText: 'Đóng',
-      confirmButtonColor: '#dc2626',
+      confirmButtonColor: '#b45309',
     })
 
     if (!result.isConfirmed) {
@@ -104,7 +104,7 @@ function OrderHistoryPage() {
         <div className="flex justify-center gap-3">
           <Link
             to="/login"
-            className="rounded-lg bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800"
+            className="rounded-lg bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
           >
             Đăng nhập
           </Link>
@@ -123,7 +123,7 @@ function OrderHistoryPage() {
     <section className="container-app space-y-6">
 
       <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-600">Order history</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-600">Order history</p>
         <h1 className="mt-2 text-3xl font-black text-zinc-900">Lịch sử đặt hàng</h1>
         <p className="mt-2 text-sm text-zinc-500">Hiển thị các đơn hàng gần nhất của bạn. Tổng cộng {totalOrders} đơn.</p>
       </div>
@@ -133,7 +133,7 @@ function OrderHistoryPage() {
           Đang tải lịch sử đặt hàng...
         </div>
       ) : error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"></div>
       ) : orders.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center text-zinc-500 shadow-sm">
           Chưa có đơn hàng nào. Hãy quay lại mua sắm nhé.
@@ -161,12 +161,12 @@ function OrderHistoryPage() {
 
                   <div className="text-left lg:text-right">
                     <p className="text-sm text-zinc-500">Tổng tiền</p>
-                    <p className="text-2xl font-black text-red-700">{formatVnd(order.totalAmount)}</p>
+                    <p className="text-2xl font-black text-amber-700">{formatVnd(order.totalAmount)}</p>
                     {canCancel && (
                       <button
                         type="button"
                         onClick={() => handleCancel(order.orderId, order.orderId)}
-                        className="mt-3 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                        className="mt-3 rounded-lg border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
                       >
                         Hủy đơn hàng
                       </button>

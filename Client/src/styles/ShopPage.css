@@ -24,7 +24,7 @@
   aspect-ratio: 4 / 3;
   border-radius: 12px;
   overflow: hidden;
-  background: #f3f4f6;
+  background: #fef3c7;
 }
 
 .shop-card__image {
@@ -100,9 +100,9 @@
   height: 42px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  background: linear-gradient(135deg, var(--accent), #b45309);
   color: #fff;
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 12px 30px rgba(217, 119, 6, 0.25);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -112,7 +112,7 @@
 
 .shop-cart-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 16px 40px rgba(217, 119, 6, 0.3);
 }
 
 .shop-cart-btn svg {

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Swal from 'sweetalert2'
 
@@ -22,7 +22,6 @@ function AdminSimpleCrudPage({
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
-      isActive: true,
     },
   })
 
@@ -46,19 +45,19 @@ function AdminSimpleCrudPage({
 
   const openCreateModal = () => {
     setSelectedItem(null)
-    reset({ name: '', isActive: true })
+    reset({ name: '' })
     setModalOpen(true)
   }
 
   const openEditModal = (item) => {
     setSelectedItem(item)
-    reset({ name: item.name ?? '', isActive: Boolean(item.isActive) })
+    reset({ name: item.name ?? '' })
     setModalOpen(true)
   }
 
   const closeModal = () => {
     setSelectedItem(null)
-    reset({ name: '', isActive: true })
+    reset({ name: '' })
     setModalOpen(false)
   }
 
@@ -92,7 +91,7 @@ function AdminSimpleCrudPage({
     try {
       const payload = {
         name: values.name.trim(),
-        isActive: values.isActive,
+        isActive: true,
       }
 
       if (selectedItem) {
@@ -233,11 +232,6 @@ function AdminSimpleCrudPage({
                 />
                 {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
               </div>
-
-              <label className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-700">
-                <input type="checkbox" className="h-4 w-4 accent-red-600" {...register('isActive')} />
-                Đang hoạt động
-              </label>
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button

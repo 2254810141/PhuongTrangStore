@@ -4,6 +4,7 @@ namespace Store.DAL.Interfaces;
 
 public interface IOrderRepository
 {
+    Task<IEnumerable<Order>> GetOrdersAsync();
     Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> productIds);
     Task CreateOrderWithItemsAsync(Order order, IEnumerable<OrderItem> orderItems, IEnumerable<Cart>? cartsToClear = null);
     Task UpsertOrderWithItemsAsync(Order order, IEnumerable<OrderItem> orderItems, IEnumerable<Cart>? cartsToClear = null);

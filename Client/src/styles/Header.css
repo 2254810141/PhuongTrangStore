@@ -87,7 +87,7 @@
 
 .header-search:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.14);
 }
 
 .cart-btn {
@@ -99,9 +99,9 @@
   padding: 8px 12px;
   font-weight: 700;
   font-size: 14px;
-  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  background: linear-gradient(135deg, var(--accent), #b45309);
   color: #fff;
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 12px 30px rgba(217, 119, 6, 0.25);
 }
 
 .header__actions .ghost-btn {

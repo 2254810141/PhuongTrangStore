@@ -50,7 +50,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
       showCancelButton: true,
       confirmButtonText: 'Xóa',
       cancelButtonText: 'Hủy',
-      confirmButtonColor: '#dc2626',
+      confirmButtonColor: '#b45309',
     })
 
     if (result.isConfirmed) {
@@ -66,7 +66,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
       showCancelButton: true,
       confirmButtonText: 'Xóa',
       cancelButtonText: 'Hủy',
-      confirmButtonColor: '#dc2626',
+      confirmButtonColor: '#b45309',
     })
 
     if (result.isConfirmed) {
@@ -78,7 +78,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
     <section className="container-app space-y-5">
       <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-red-600">Giỏ hàng</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-600">Giỏ hàng</p>
           <h2 className="mt-2 text-2xl font-black text-zinc-900">Thông tin đơn hàng</h2>
           <p className="mt-2 text-sm text-zinc-500">Kiểm tra số lượng trước khi thanh toán.</p>
         </div>
@@ -98,7 +98,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
                     type="checkbox"
                     checked={isAllSelected}
                     onChange={toggleSelectAll}
-                    className="h-4 w-4 rounded border-zinc-300 text-red-700 focus:ring-red-600"
+                    className="h-4 w-4 rounded border-zinc-300 text-amber-700 focus:ring-amber-600"
                   />
                   Chọn tất cả
                 </label>
@@ -115,7 +115,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
                       type="checkbox"
                       checked={selectedProductIds.some((id) => String(id) === String(item.id))}
                       onChange={() => toggleItem(item.id)}
-                      className="h-4 w-4 rounded border-zinc-300 text-red-700 focus:ring-red-600"
+                      className="h-4 w-4 rounded border-zinc-300 text-amber-700 focus:ring-amber-600"
                     />
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover object-center" />
@@ -148,7 +148,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
                     <strong>{currency.format(item.price * item.quantity)}</strong>
                     <button
                       type="button"
-                      className="text-sm font-semibold text-red-700 transition hover:text-red-800"
+                      className="text-sm font-semibold text-amber-700 transition hover:text-amber-800"
                       onClick={() => handleRemoveItem(item)}
                     >
                       Xóa
@@ -165,7 +165,7 @@ function CartPage({ cartItems = [], onRemoveItem = () => {}, onUpdateQuantity = 
                 type="button"
                 disabled={selectedItems.length === 0}
                 onClick={() => navigate('/checkout', { state: { selectedProductIds: selectedItems.map((item) => Number(item.id)) } })}
-                className="mt-4 w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 w-full rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Thanh toán {selectedItems.length > 0 ? `(${selectedItems.length})` : ''}
               </button>

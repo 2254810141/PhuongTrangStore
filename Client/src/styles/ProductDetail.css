@@ -63,7 +63,7 @@
   aspect-ratio: 4 / 3;
   border-radius: 14px;
   overflow: hidden;
-  background: #eef2ff;
+  background: #fef3c7;
 }
 
 .detail-media img {
@@ -104,8 +104,8 @@
 
 .detail-price-block {
   border-radius: 14px;
-  border: 1px solid #dbe5ff;
-  background: linear-gradient(135deg, #f8faff, #eef4ff);
+  border: 1px solid #fcd5a6;
+  background: linear-gradient(135deg, #fffbf0, #fef3c7);
   padding: 12px 14px;
   display: grid;
   gap: 4px;
@@ -132,7 +132,7 @@
 .detail-meta-item {
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fafbff;
+  background: #fffbf0;
   padding: 10px 12px;
   display: grid;
   gap: 4px;

@@ -142,7 +142,7 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
         <p className="text-sm text-zinc-500">Giỏ hàng của bạn đang trống.</p>
         <Link
           to="/products"
-          className="inline-flex items-center justify-center rounded-lg bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800"
+          className="inline-flex items-center justify-center rounded-lg bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
         >
           Quay lại mua sắm
         </Link>
@@ -153,7 +153,7 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
   return (
     <section className="container-app space-y-6">
       <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-600">Checkout</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-600">Checkout</p>
         <h1 className="mt-2 text-3xl font-black text-zinc-900">Thanh toán đơn hàng</h1>
         <p className="mt-2 text-sm text-zinc-500">
           {isAuthenticated
@@ -178,20 +178,20 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
                 <label className="mb-2 block text-sm font-semibold text-zinc-700">Họ và tên</label>
                 <input
                   type="text"
-                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-red-500"
+                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500"
                   {...register('customerName', { required: 'Vui lòng nhập họ và tên' })}
                 />
-                {errors.customerName && <p className="mt-1 text-xs text-red-600">{errors.customerName.message}</p>}
+                {errors.customerName && <p className="mt-1 text-xs text-amber-600">{errors.customerName.message}</p>}
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-zinc-700">Số điện thoại</label>
                 <input
                   type="tel"
-                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-red-500"
+                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500"
                   {...register('customerPhone', { required: 'Vui lòng nhập số điện thoại' })}
                 />
-                {errors.customerPhone && <p className="mt-1 text-xs text-red-600">{errors.customerPhone.message}</p>}
+                {errors.customerPhone && <p className="mt-1 text-xs text-amber-600">{errors.customerPhone.message}</p>}
               </div>
             </div>
 
@@ -199,7 +199,7 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
               <label className="mb-2 block text-sm font-semibold text-zinc-700">Email</label>
               <input
                 type="email"
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-red-500"
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500"
                 {...register('customerEmail')}
               />
             </div>
@@ -208,10 +208,10 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
               <label className="mb-2 block text-sm font-semibold text-zinc-700">Địa chỉ giao hàng</label>
               <textarea
                 rows="4"
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-red-500"
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500"
                 {...register('shippingAddress', { required: 'Vui lòng nhập địa chỉ giao hàng' })}
               />
-              {errors.shippingAddress && <p className="mt-1 text-xs text-red-600">{errors.shippingAddress.message}</p>}
+              {errors.shippingAddress && <p className="mt-1 text-xs text-amber-600">{errors.shippingAddress.message}</p>}
             </div>
 
             <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
@@ -236,7 +236,7 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
             <button
               type="submit"
               disabled={isSubmitting || hasContactItems}
-              className="w-full rounded-xl bg-red-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-800 disabled:opacity-60"
+              className="w-full rounded-xl bg-amber-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-amber-800 disabled:opacity-60"
             >
               {isSubmitting ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
             </button>

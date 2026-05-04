@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5026'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5026'
 
 export const PLACEHOLDER_IMAGE = '/product-placeholder.svg'
 
@@ -19,6 +19,7 @@ export function mapProductDto(item) {
   const name = item.name ?? item.Name ?? item.productName ?? item.ProductName ?? 'Sản phẩm'
   const image = item.image ?? item.Image ?? item.productsImages ?? item.ProductsImages
   const categoryId = item.categoryId ?? item.CategoryId ?? 0
+  const brandId = item.brandId ?? item.BrandId ?? 0
   const price = Number(item.price ?? item.Price ?? 0)
   const isContactPrice = Boolean(item.isContactPrice ?? item.IsContactPrice)
   const isActive = item.isActive ?? item.IsActive ?? true
@@ -32,6 +33,7 @@ export function mapProductDto(item) {
     isContactPrice,
     isActive,
     categoryId: Number(categoryId ?? 0),
+    brandId: Number(brandId ?? 0),
     description,
     displayPrice: isContactPrice ? 'Liên hệ' : formatVnd(price),
   }

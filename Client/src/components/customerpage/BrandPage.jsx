@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProductGrid from './ProductGrid'
 import { getProducts } from '../../services/productApi'
@@ -68,13 +68,13 @@ function BrandPage({ onAddToCart = () => {} }) {
   }
 
   if (error) {
-    return <section className="container-app text-red-700">{error}</section>
+    return <section className="container-app text-amber-700">{error}</section>
   }
 
   return (
     <section className="container-app space-y-5">
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-widest text-red-600">Thương hiệu</p>
+      <div className="rounded-xl border border-amber-300 bg-amber-200 p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-600">Thương hiệu</p>
         <h1 className="mt-2 text-2xl font-bold text-zinc-900">{title}</h1>
         <p className="mt-2 text-sm text-zinc-500">Tìm thấy {products.length} sản phẩm đang kinh doanh.</p>
       </div>
@@ -104,7 +104,7 @@ function BrandPage({ onAddToCart = () => {} }) {
                     type="button"
                     className={`h-9 min-w-9 rounded-md border px-3 text-sm font-semibold transition ${
                       page === safeCurrentPage
-                        ? 'border-red-700 bg-red-700 text-white'
+                        ? 'border-amber-700 bg-amber-700 text-white'
                         : 'border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100'
                     }`}
                     onClick={() => goToPage(page)}

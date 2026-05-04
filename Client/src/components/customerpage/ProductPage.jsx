@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getProducts } from '../../services/productApi'
 import ProductGrid from './ProductGrid'
 
@@ -54,11 +54,10 @@ function ProductPage({ onAddToCart = () => {} }) {
 
   return (
     <section className="container-app space-y-5">
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-amber-300 bg-amber-200 p-5 shadow-sm">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-600">Tất cả sản phẩm</p>
           <h2 className="mt-2 text-2xl font-black text-zinc-900">Danh sách dụng cụ và thiết bị</h2>
-          <p className="mt-2 text-sm text-zinc-500">Chỉ hiển thị sản phẩm đang hoạt động (IsActive = true).</p>
         </div>
       </div>
 

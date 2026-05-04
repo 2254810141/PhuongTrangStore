@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
+using Store.BLL.Hubs;
 using Store.BLL.DTOs.Order;
+using Store.BLL.DTOs.Notification;
 using Store.BLL.DTOs.Payment;
 using Store.BLL.Interfaces;
 using Store.DAL.Interfaces;
@@ -48,21 +51,32 @@ public class OrderService : IOrderService
     private readonly ICartRepository _cartRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IVnPayService _vnPayService;
+    private readonly INotificationService _notificationService;
     private readonly string _vnpayReturnUrl;
+    private readonly IHubContext<OrderNotificationHub> _hubContext;
 
     public OrderService(
         ICartRepository cartRepository,
         IOrderRepository orderRepository,
         IVnPayService vnPayService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHubContext<OrderNotificationHub> hubContext,
+        INotificationService notificationService)
     {
         _cartRepository = cartRepository;
         _orderRepository = orderRepository;
         _vnPayService = vnPayService;
         _vnpayReturnUrl = configuration["VnPay:ReturnUrl"]
                           ?? throw new InvalidOperationException("VnPay:ReturnUrl is missing.");
+        _hubContext = hubContext;
+        _notificationService = notificationService;
     }
 
+    public async Task<IEnumerable<OrderRespondDto>> GetOrdersAsync()
+    {
+        var orders = await  _orderRepository.GetOrdersAsync();
+        return orders.OrderByDescending(o => o.CreatedAt).Select(MapOrderRespond);
+    }
     public async Task<CheckoutResultDto> CheckoutCodAsync(int userId, CheckoutCodRequest request)
     {
         EnsureValidUser(userId);
@@ -89,6 +103,9 @@ public class OrderService : IOrderService
         var orderItems = BuildOrderItems(itemPayload);
 
         await _orderRepository.UpsertOrderWithItemsAsync(order, orderItems, checkoutCartItems);
+
+        // Gửi thông báo tới Admin
+        await NotifyOrderCreated(order, orderItems);
 
         return MapCheckoutResult(order);
     }
@@ -141,6 +158,9 @@ public class OrderService : IOrderService
 
         await _orderRepository.CreateOrderWithItemsAsync(order, orderItems);
 
+        // Gửi thông báo tới Admin
+        await NotifyOrderCreated(order, orderItems);
+
         return MapCheckoutResult(order);
     }
 
@@ -182,6 +202,9 @@ public class OrderService : IOrderService
         var orderItems = BuildOrderItems(itemPayload);
 
         await _orderRepository.UpsertOrderWithItemsAsync(order, orderItems);
+
+        // Gửi thông báo tới Admin
+        await NotifyOrderCreated(order, orderItems);
 
         return BuildVnPayResult(order, clientIp);
     }
@@ -260,6 +283,21 @@ public class OrderService : IOrderService
         var order = await _orderRepository.GetOrderWithItemsByUserIdAsync(orderId, userId);
         return order is null ? null : MapOrderSummary(order);
     }
+    
+    public async Task<OrderRespondDto?> AdminCancelOrderAsync(int orderId)
+    {
+        var order = await _orderRepository.GetOrderWithItemsAsync(orderId);
+        if (order is null) return null;
+
+        // Chỉ cho hủy nếu đang ở trạng thái có thể hủy
+        var canCancel = new[] { PendingConfirmStatus};
+        if (!canCancel.Contains(order.Status))
+            throw new ArgumentException("Đơn hàng này không thể hủy.");
+
+        order.Status = CancelledStatus;
+        await _orderRepository.SaveChangesAsync();
+        return MapOrderRespond(order);
+    }
 
     public async Task<OrderSummaryDto?> CancelMyOrderAsync(int userId, int orderId)
     {
@@ -287,11 +325,11 @@ public class OrderService : IOrderService
         return MapOrderSummary(order);
     }
 
-    public async Task<OrderSummaryDto?> GetOrderByIdAsync(int orderId)
+    public async Task<OrderRespondDto?> GetOrderByIdAsync(int orderId)
     {
         if (orderId <= 0) throw new ArgumentException("OrderId không hợp lệ.");
         var order = await _orderRepository.GetOrderWithItemsAsync(orderId);
-        return order is null ? null : MapOrderSummary(order);
+        return order is null ? null : MapOrderRespond(order);
     }
 
     public async Task UpdateOrderStatusAsync(int orderId, UpdateOrderStatusRequest request)
@@ -525,5 +563,49 @@ public class OrderService : IOrderService
                 Quantity = oi.Quantity ?? 0
             }).ToList()
         };
+    }
+    private static OrderRespondDto MapOrderRespond(Order order)
+    {
+        return new OrderRespondDto
+        {
+            OrderId = order.Id,
+            CustomerName = order.CustomerName,
+            CustomerPhone = order.CustomerPhone,
+            CustomerEmail = order.CustomerEmail,
+            ShippingAddress = order.ShippingAddress,
+            TotalAmount = order.TotalAmount ?? 0m,
+            PaymentMethod = order.PaymentMethod ?? ShipCodMethod,
+            Status = order.Status ?? PendingConfirmStatus,
+            CreatedAt = order.CreatedAt ?? DateTime.UtcNow,
+            Items = order.OrderItems.Select(oi => new OrderItemSummaryDto
+            {
+                ProductId = oi.ProductId ?? 0,
+                ProductName = oi.Product?.Name ?? string.Empty,
+                ProductImage = oi.Product?.Image,
+                Price = oi.Price,
+                Quantity = oi.Quantity ?? 0
+            }).ToList()
+        };
+    }
+
+    private async Task NotifyOrderCreated(Order order, List<OrderItem> orderItems)
+    {
+        try
+        {
+            var notification = await _notificationService.CreateAsync(new CreateNotificationRequest
+            {
+                Title = $"Đơn hàng mới #{order.Id}",
+                Message = $"Khách: {order.CustomerName} - {order.CustomerPhone}",
+                OrderId = order.Id
+            });
+
+            await _hubContext.Clients.Group("Admins")
+                .SendAsync("NewOrderCreated", notification);
+        }
+        catch (Exception ex)
+        {
+            // Log error nhưng không throw, vì notification không nên ảnh hưởng đến checkout
+            System.Diagnostics.Debug.WriteLine($"Error sending order notification: {ex.Message}");
+        }
     }
 }
