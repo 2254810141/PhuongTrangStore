@@ -1,10 +1,12 @@
-﻿import { useParams, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { getProductById } from '../../services/productApi'
+import { getBrands } from '../../services/brandApi'
 
 function ProductDetailPage({ onAddToCart = () => {} }) {
   const { productId } = useParams()
   const [product, setProduct] = useState(null)
+  const [brandName, setBrandName] = useState('Chính hãng')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -16,6 +18,22 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
         const data = await getProductById(productId)
         if (isMounted) {
           setProduct(data)
+        }
+
+        if (data?.brandId) {
+          try {
+            const brands = await getBrands()
+            if (!isMounted) return
+
+            const matchedBrand = brands.find((item) => String(item.id) === String(data.brandId))
+            setBrandName(matchedBrand?.name ?? 'Chính hãng')
+          } catch {
+            if (isMounted) {
+              setBrandName('Chính hãng')
+            }
+          }
+        } else if (isMounted) {
+          setBrandName('Chính hãng')
         }
       } catch (err) {
         if (isMounted) {
@@ -107,6 +125,16 @@ function ProductDetailPage({ onAddToCart = () => {} }) {
 
           <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-600 leading-6">
             <p>{product.description?.trim() || 'Chưa có mô tả cho sản phẩm này.'}</p>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+            <p className="text-sm font-semibold text-zinc-700 mb-2">Thương hiệu</p>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+                {brandName}
+              </span>
+              <span className="text-xs text-zinc-500">Hàng chất lượng cao</span>
+            </div>
           </div>
 
           <div className="flex gap-3">

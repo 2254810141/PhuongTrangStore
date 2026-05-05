@@ -35,7 +35,7 @@ public class NotificationService : INotificationService
     {
         if (id <= 0)
         {
-            throw new ArgumentException("NotificationId không hợp lệ.");
+            throw new ArgumentException("NotificationId is not valid.");
         }
 
         var notification = await _notificationRepository.GetByIdAsync(id);
@@ -51,12 +51,12 @@ public class NotificationService : INotificationService
 
         if (string.IsNullOrWhiteSpace(request.Title))
         {
-            throw new ArgumentException("Title là bắt buộc.");
+            throw new ArgumentException("Title is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.Message))
         {
-            throw new ArgumentException("Message là bắt buộc.");
+            throw new ArgumentException("Message is required.");
         }
 
         var entity = new Notification
@@ -75,8 +75,7 @@ public class NotificationService : INotificationService
     public async Task<int> MarkAsReadAsync(int? id)
     {
         return id.HasValue
-            ? await _notificationRepository.MarkAsReadAsync(id.Value)
-            : await _notificationRepository.MarkAllAsReadAsync();
+            ? await _notificationRepository.MarkAsReadAsync(id.Value) : await _notificationRepository.MarkAllAsReadAsync();
     }
 
     private static NotificationDto MapToDto(Notification notification)

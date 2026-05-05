@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProductGrid from './ProductGrid'
 import { getProducts } from '../../services/productApi'
 import { getCategories } from '../../services/categoryApi'
-import { categorySlugMap, getCategoryLabelById } from '../../constants/menuCategories'
 
 function CategoryPage({ onAddToCart = () => {} }) {
   const { id } = useParams()
   const [products, setProducts] = useState([])
-  const [categoryName, setCategoryName] = useState(getCategoryLabelById(id))
+  const [categoryName, setCategoryName] = useState('Danh mục sản phẩm')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -20,25 +19,15 @@ function CategoryPage({ onAddToCart = () => {} }) {
         const [productData, categoryData] = await Promise.all([getProducts(), getCategories()])
         if (!mounted) return
 
-        const acceptedCategoryIds = categorySlugMap[id] ?? []
-        const normalizedId = Number(id)
         const selectedCategory = categoryData.find((item) => String(item.id) === String(id))
 
         const filtered = productData.filter((item) => {
           if (!item.isActive) return false
-          if (acceptedCategoryIds.length > 0) {
-            return acceptedCategoryIds.includes(item.categoryId)
-          }
-
-          if (!Number.isNaN(normalizedId)) {
-            return item.categoryId === normalizedId
-          }
-
-          return true
+          return String(item.categoryId) === String(id)
         })
 
         setProducts(filtered)
-        setCategoryName(selectedCategory?.name ?? getCategoryLabelById(id))
+        setCategoryName(selectedCategory?.name ?? 'Danh mục sản phẩm')
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Không thể tải danh mục')
@@ -55,7 +44,7 @@ function CategoryPage({ onAddToCart = () => {} }) {
     }
   }, [id])
 
-  const title = useMemo(() => categoryName, [categoryName])
+  const title = categoryName
 
   if (isLoading) {
     return <section className="container-app">Đang tải danh mục...</section>
