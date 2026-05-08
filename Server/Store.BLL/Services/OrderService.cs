@@ -22,6 +22,7 @@ public class OrderService : IOrderService
     private const string ExpiredStatus = "expired";
     private static readonly TimeSpan PendingOrderLifetime = TimeSpan.FromMinutes(15);
 
+
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
         DraftStatus,
@@ -54,6 +55,8 @@ public class OrderService : IOrderService
     private readonly INotificationService _notificationService;
     private readonly string _vnpayReturnUrl;
     private readonly IHubContext<OrderNotificationHub> _hubContext;
+    private readonly IEmailService _emailService;
+    private static readonly TimeZoneInfo VietnamTimeZone = ResolveVietnamTimeZone();
 
     public OrderService(
         ICartRepository cartRepository,
@@ -61,7 +64,8 @@ public class OrderService : IOrderService
         IVnPayService vnPayService,
         IConfiguration configuration,
         IHubContext<OrderNotificationHub> hubContext,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IEmailService emailService)
     {
         _cartRepository = cartRepository;
         _orderRepository = orderRepository;
@@ -70,13 +74,15 @@ public class OrderService : IOrderService
                           ?? throw new InvalidOperationException("VnPay:ReturnUrl is missing.");
         _hubContext = hubContext;
         _notificationService = notificationService;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<OrderRespondDto>> GetOrdersAsync()
     {
-        var orders = await  _orderRepository.GetOrdersAsync();
+        var orders = await _orderRepository.GetOrdersAsync();
         return orders.OrderByDescending(o => o.CreatedAt).Select(MapOrderRespond);
     }
+
     public async Task<CheckoutResultDto> CheckoutCodAsync(int userId, CheckoutCodRequest request)
     {
         EnsureValidUser(userId);
@@ -99,13 +105,27 @@ public class OrderService : IOrderService
         var itemPayload = checkoutCartItems.Select(c => (c.ProductId, c.Quantity, c.Product)).ToList();
         ValidateCartItems(itemPayload);
 
-        var order = BuildAuthenticatedOrder(userId, request.CustomerName, request.CustomerPhone, request.CustomerEmail, request.ShippingAddress, ShipCodMethod, PendingConfirmStatus, reusableOrder, itemPayload.Sum(c => (c.Product.Price ?? 0m) * c.Quantity));
+        var order = BuildAuthenticatedOrder(userId, request.CustomerName, request.CustomerPhone, request.CustomerEmail,
+            request.ShippingAddress, ShipCodMethod, PendingConfirmStatus, reusableOrder,
+            itemPayload.Sum(c => (c.Product.Price ?? 0m) * c.Quantity));
         var orderItems = BuildOrderItems(itemPayload);
 
         await _orderRepository.UpsertOrderWithItemsAsync(order, orderItems, checkoutCartItems);
+        try
+        {
+            await _emailService.SendOrderEmailsAsync(
+                order.CustomerEmail,
+                order.CustomerName,
+                order.Id,
+                order.TotalAmount ?? 0m);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error sending order email: {ex.Message}");
+        }
 
         // Gửi thông báo tới Admin
-        await NotifyOrderCreated(order, orderItems);
+        await NotifyOrderCreated(order);
 
         return MapCheckoutResult(order);
     }
@@ -151,20 +171,33 @@ public class OrderService : IOrderService
             PaymentMethod = ShipCodMethod,
             Status = PendingConfirmStatus,
             TotalAmount = itemPayload.Sum(i => (i.Item3.Price ?? 0m) * i.Quantity),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = GetVietnamNow()
         };
 
         var orderItems = BuildOrderItems(itemPayload);
 
         await _orderRepository.CreateOrderWithItemsAsync(order, orderItems);
+        try
+        {
+            await _emailService.SendOrderEmailsAsync(
+                order.CustomerEmail,
+                order.CustomerName,
+                order.Id,
+                order.TotalAmount ?? 0m);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error sending order email: {ex.Message}");
+        }
 
         // Gửi thông báo tới Admin
-        await NotifyOrderCreated(order, orderItems);
+        await NotifyOrderCreated(order);
 
         return MapCheckoutResult(order);
     }
 
-    public async Task<CheckoutVnPayResultDto> CheckoutVnPayAsync(int userId, CheckoutVnPayRequest request, string? clientIp)
+    public async Task<CheckoutVnPayResultDto> CheckoutVnPayAsync(int userId, CheckoutVnPayRequest request,
+        string? clientIp)
     {
         EnsureValidUser(userId);
         ValidateCustomerInfo(request.CustomerName, request.CustomerPhone, request.ShippingAddress);
@@ -203,9 +236,6 @@ public class OrderService : IOrderService
 
         await _orderRepository.UpsertOrderWithItemsAsync(order, orderItems);
 
-        // Gửi thông báo tới Admin
-        await NotifyOrderCreated(order, orderItems);
-
         return BuildVnPayResult(order, clientIp);
     }
 
@@ -229,7 +259,7 @@ public class OrderService : IOrderService
         if (!string.Equals(order.PaymentMethod, VnPayMethod, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Đơn hàng này không phải thanh toán bằng VNPAY.");
 
-        if (IsExpired(order, DateTime.UtcNow))
+        if (IsExpired(order, GetVietnamNow()))
         {
             order.Status = ExpiredStatus;
             await _orderRepository.SaveChangesAsync();
@@ -241,6 +271,7 @@ public class OrderService : IOrderService
 
         order.Status = ConfirmedStatus;
         await _orderRepository.SaveChangesAsync();
+        await NotifyOrderPaidAsync(order);
 
         if (order.UserId.HasValue)
         {
@@ -283,14 +314,14 @@ public class OrderService : IOrderService
         var order = await _orderRepository.GetOrderWithItemsByUserIdAsync(orderId, userId);
         return order is null ? null : MapOrderSummary(order);
     }
-    
+
     public async Task<OrderRespondDto?> AdminCancelOrderAsync(int orderId)
     {
         var order = await _orderRepository.GetOrderWithItemsAsync(orderId);
         if (order is null) return null;
 
         // Chỉ cho hủy nếu đang ở trạng thái có thể hủy
-        var canCancel = new[] { PendingConfirmStatus};
+        var canCancel = new[] { PendingConfirmStatus };
         if (!canCancel.Contains(order.Status))
             throw new ArgumentException("Đơn hàng này không thể hủy.");
 
@@ -364,7 +395,7 @@ public class OrderService : IOrderService
         if (string.Equals(order.Status, ConfirmedStatus, StringComparison.OrdinalIgnoreCase))
             return MapOrderSummary(order);
 
-        order.Status = IsExpired(order, DateTime.UtcNow) ? ExpiredStatus : CancelledStatus;
+        order.Status = IsExpired(order, GetVietnamNow()) ? ExpiredStatus : CancelledStatus;
         await _orderRepository.SaveChangesAsync();
 
         return MapOrderSummary(order);
@@ -373,7 +404,7 @@ public class OrderService : IOrderService
     private async Task ExpireStalePendingOrdersAsync(int userId)
     {
         var orders = await _orderRepository.GetOrdersByUserIdAsync(userId);
-        var now = DateTime.UtcNow;
+        var now = GetVietnamNow();
         var changed = false;
 
         foreach (var order in orders)
@@ -440,7 +471,8 @@ public class OrderService : IOrderService
         }
     }
 
-    private static List<Cart> ResolveCheckoutCartItems(List<Cart> cartItems, IReadOnlyCollection<int>? selectedProductIds)
+    private static List<Cart> ResolveCheckoutCartItems(List<Cart> cartItems,
+        IReadOnlyCollection<int>? selectedProductIds)
     {
         if (selectedProductIds is null || selectedProductIds.Count == 0)
         {
@@ -465,7 +497,8 @@ public class OrderService : IOrderService
         return selectedItems;
     }
 
-    private static List<OrderItem> BuildOrderItems<T>(IEnumerable<(int ProductId, int Quantity, T Product)> items) where T : Product
+    private static List<OrderItem> BuildOrderItems<T>(IEnumerable<(int ProductId, int Quantity, T Product)> items)
+        where T : Product
     {
         return items.Select(i => new OrderItem
         {
@@ -474,6 +507,7 @@ public class OrderService : IOrderService
             Price = i.Product.Price ?? 0m
         }).ToList();
     }
+    
 
     private static Order BuildAuthenticatedOrder(
         int userId,
@@ -486,7 +520,7 @@ public class OrderService : IOrderService
         Order? reusableOrder,
         decimal totalAmount)
     {
-        var now = DateTime.UtcNow;
+        var now = GetVietnamNow();
         var order = reusableOrder ?? new Order
         {
             CreatedAt = now
@@ -513,13 +547,13 @@ public class OrderService : IOrderService
             TotalAmount = order.TotalAmount ?? 0m,
             PaymentMethod = order.PaymentMethod ?? ShipCodMethod,
             Status = order.Status ?? PendingConfirmStatus,
-            CreatedAt = order.CreatedAt ?? DateTime.UtcNow
+            CreatedAt = order.CreatedAt ?? GetVietnamNow()
         };
     }
 
     private CheckoutVnPayResultDto BuildVnPayResult(Order order, string? clientIp)
     {
-        var now = DateTime.UtcNow;
+        var now = GetVietnamNow();
         var expiresAt = now.Add(PendingOrderLifetime);
 
         var paymentUrl = _vnPayService.CreatePaymentUrl(new VnPayCreatePaymentRequest
@@ -553,7 +587,7 @@ public class OrderService : IOrderService
             TotalAmount = order.TotalAmount ?? 0m,
             PaymentMethod = order.PaymentMethod ?? ShipCodMethod,
             Status = order.Status ?? PendingConfirmStatus,
-            CreatedAt = order.CreatedAt ?? DateTime.UtcNow,
+            CreatedAt = order.CreatedAt ?? GetVietnamNow(),
             Items = order.OrderItems.Select(oi => new OrderItemSummaryDto
             {
                 ProductId = oi.ProductId ?? 0,
@@ -564,6 +598,7 @@ public class OrderService : IOrderService
             }).ToList()
         };
     }
+
     private static OrderRespondDto MapOrderRespond(Order order)
     {
         return new OrderRespondDto
@@ -576,7 +611,7 @@ public class OrderService : IOrderService
             TotalAmount = order.TotalAmount ?? 0m,
             PaymentMethod = order.PaymentMethod ?? ShipCodMethod,
             Status = order.Status ?? PendingConfirmStatus,
-            CreatedAt = order.CreatedAt ?? DateTime.UtcNow,
+            CreatedAt = order.CreatedAt ?? GetVietnamNow(),
             Items = order.OrderItems.Select(oi => new OrderItemSummaryDto
             {
                 ProductId = oi.ProductId ?? 0,
@@ -588,7 +623,7 @@ public class OrderService : IOrderService
         };
     }
 
-    private async Task NotifyOrderCreated(Order order, List<OrderItem> orderItems)
+    private async Task NotifyOrderCreated(Order order)
     {
         try
         {
@@ -607,5 +642,51 @@ public class OrderService : IOrderService
             // Log error nhưng không throw, vì notification không nên ảnh hưởng đến checkout
             System.Diagnostics.Debug.WriteLine($"Error sending order notification: {ex.Message}");
         }
+    }
+    private async Task NotifyOrderPaidAsync(Order order)
+    {
+        try
+        {
+            await _emailService.SendOrderEmailsAsync(
+                order.CustomerEmail,
+                order.CustomerName,
+                order.Id,
+                order.TotalAmount ?? 0m);
+
+            var notification = await _notificationService.CreateAsync(new CreateNotificationRequest
+            {
+                Title = $"Đơn hàng đã thanh toán #{order.Id}",
+                Message = $"Khách: {order.CustomerName} - {order.CustomerPhone}",
+                OrderId = order.Id
+            });
+
+            await _hubContext.Clients.Group("Admins")
+                .SendAsync("OrderPaid", notification);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error sending paid order notification: {ex.Message}");
+        }
+    }
+
+    private static DateTime GetVietnamNow() => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, VietnamTimeZone);
+
+    private static TimeZoneInfo ResolveVietnamTimeZone()
+    {
+        foreach (var timeZoneId in new[] { "SE Asia Standard Time", "Asia/Ho_Chi_Minh" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.Utc;
     }
 }

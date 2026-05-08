@@ -138,7 +138,7 @@ function CheckoutPage({ cartItems = [], onRefreshCart = async () => {}, onClearC
   if (checkoutItems.length === 0) {
     return (
       <section className="container-app space-y-4 rounded-3xl border border-dashed border-zinc-300 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-2xl font-black text-zinc-900">Checkout</h1>
+        <h1 className="text-2xl font-black text-zinc-900">THANH TOÁN</h1>
         <p className="text-sm text-zinc-500">Giỏ hàng của bạn đang trống.</p>
         <Link
           to="/products"

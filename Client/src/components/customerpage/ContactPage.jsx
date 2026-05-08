@@ -3,20 +3,20 @@ import { Link } from 'react-router-dom'
 const contacts = [
   {
     label: 'Hotline',
-    value: '0909 000 000',
-    href: 'tel:0909000000',
+    value: '0933 901 128',
+    href: 'tel:0933901128',
     description: 'Gọi ngay để được tư vấn nhanh.',
   },
   {
     label: 'Zalo',
-    value: 'PhuongTrang Store',
-    href: 'https://zalo.me/0909000000',
+    value: 'Kim Khí Tuấn Ngọc',
+    href: 'https://zalo.me/0933901128',
     description: 'Nhắn Zalo để nhận báo giá và tư vấn chi tiết.',
   },
   {
     label: 'Facebook',
-    value: 'PhuongTrang Store',
-    href: 'https://facebook.com/phuongtrangstore',
+    value: 'Kim Khí Tuấn Ngọc',
+    href: 'https://www.facebook.com/share/17meXAAiMr/',
     description: 'Inbox Facebook để được hỗ trợ trực tiếp.',
   },
 ]
@@ -31,7 +31,7 @@ function ContactPage() {
               Liên hệ tư vấn
             </span>
             <h1 className="text-3xl font-black leading-tight text-zinc-900 lg:text-5xl">
-              Kết nối với PhươngTrang Store để nhận báo giá và tư vấn đúng nhu cầu
+              Kết nối với Kim Khí Tuấn Ngọc để nhận báo giá và tư vấn đúng nhu cầu
             </h1>
             <p className="max-w-2xl text-sm text-zinc-600 lg:text-base">
               Chúng tôi hỗ trợ nhanh các dòng dụng cụ cầm tay, máy hàn, máy công trình và vật tư kim khí.
@@ -40,7 +40,7 @@ function ContactPage() {
 
             <div className="flex flex-wrap gap-3">
               <a
-                href="tel:0909000000"
+                href="tel:0933901128"
                 className="rounded-lg bg-amber-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-amber-700"
               >
                 Gọi ngay
@@ -59,7 +59,7 @@ function ContactPage() {
             <div className="mt-4 space-y-3 text-sm text-zinc-300">
               <div className="rounded-xl border border-amber-300 bg-white p-4">
                 <p className="text-amber-600">Giờ làm việc</p>
-                <p className="mt-1 font-semibold text-zinc-900">08:00 - 20:30, Thứ 2 đến Chủ nhật</p>
+                <p className="mt-1 font-semibold text-zinc-900">08:00 - 17:00, Thứ 2 đến Thứ 6</p>
               </div>
               <div className="rounded-xl border border-amber-300 bg-white p-4">
                 <p className="text-amber-600">Hỗ trợ kỹ thuật</p>
@@ -98,11 +98,13 @@ function ContactPage() {
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-3xl border border-amber-300 bg-amber-100 p-6 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">Địa chỉ hỗ trợ</p>
-          <h2 className="mt-2 text-2xl font-black text-zinc-900">PhươngTrang Store</h2>
+          <h2 className="mt-2 text-2xl font-black text-zinc-900">Kim Khí Tuấn Ngọc</h2>
           <p className="mt-3 text-sm leading-6 text-zinc-600">
-            Hotline: <a className="font-semibold text-amber-700" href="tel:0909000000">0909 000 000</a>
+            Hotline: <a className="font-semibold text-amber-700" href="tel:0933901128">0933 901 128</a>
             <br />
-            Email: <a className="font-semibold text-amber-700" href="mailto:hotro@phuongtrangstore.vn">hotro@phuongtrangstore.vn</a>
+            Email: <a className="font-semibold text-amber-700" href="mailto:hotro@kimkhituannngoc.vn">hotro@kimkhituannngoc.vn</a>
+            <br />
+            Địa chỉ: 22/2B Đường Cây Cám, Phường Bình Tân, TP Hồ Chí Minh
             <br />
             Chúng tôi luôn sẵn sàng tư vấn nhanh các sản phẩm báo giá liên hệ.
           </p>

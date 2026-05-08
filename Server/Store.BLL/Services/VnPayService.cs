@@ -13,6 +13,7 @@ public class VnPayService : IVnPayService
     private readonly string _tmnCode;
     private readonly string _hashSecret;
     private readonly string _baseUrl;
+    private static readonly TimeZoneInfo VietnamTimeZone = ResolveVietnamTimeZone();
 
     public VnPayService(IConfiguration configuration)
     {
@@ -25,9 +26,8 @@ public class VnPayService : IVnPayService
 
     public string CreatePaymentUrl(VnPayCreatePaymentRequest request)
     {
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        var createDate = TimeZoneInfo.ConvertTimeFromUtc(request.CreatedAt, timeZone);
-        var expireDate = TimeZoneInfo.ConvertTimeFromUtc(request.ExpireAt, timeZone);
+        var createDate = NormalizeVietnamTime(request.CreatedAt);
+        var expireDate = NormalizeVietnamTime(request.ExpireAt);
 
         var vnpCreateDate = createDate.ToString("yyyyMMddHHmmss");
         var vnpExpireDate = expireDate.ToString("yyyyMMddHHmmss");
@@ -85,5 +85,34 @@ public class VnPayService : IVnPayService
         using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(key));
         var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(inputData));
         return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+    }
+
+    private static DateTime NormalizeVietnamTime(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => TimeZoneInfo.ConvertTimeFromUtc(dateTime, VietnamTimeZone),
+            DateTimeKind.Local => TimeZoneInfo.ConvertTime(dateTime, VietnamTimeZone),
+            _ => dateTime
+        };
+    }
+
+    private static TimeZoneInfo ResolveVietnamTimeZone()
+    {
+        foreach (var timeZoneId in new[] { "SE Asia Standard Time", "Asia/Ho_Chi_Minh" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.Utc;
     }
 }

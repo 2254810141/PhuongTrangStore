@@ -33,7 +33,7 @@ function AdminLayout() {
         <aside className="border-b border-zinc-200 bg-amber-900 text-white lg:border-b-0 lg:border-r">
           <div className="flex h-full flex-col">
             <div className="border-b border-amber-800 p-6">
-              <p className="text-lg font-black tracking-wide text-amber-400">PhươngTrang Store</p>
+              <p className="text-lg font-black tracking-wide text-amber-400">Kim Khí Tuấn Ngọc</p>
               <p className="mt-1 text-sm text-amber-100">Admin Panel</p>
             </div>
 
@@ -74,7 +74,7 @@ function AdminLayout() {
           <header className="border-b border-zinc-200 bg-white px-5 py-4 shadow-sm sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-600">PhươngTrang Store - Admin Panel</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-600">Kim Khí Tuấn Ngọc - Admin Panel</p>
                 <h1 className="mt-1 text-xl font-black text-zinc-900">Bảng điều khiển quản trị</h1>
               </div>
               <div className="flex items-center gap-3">

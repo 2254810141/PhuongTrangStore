@@ -46,14 +46,14 @@ function HomePage({ onAddToCart = () => {} }) {
           <div className="grid gap-8 bg-brand-grid bg-grid p-8 lg:grid-cols-2 lg:p-10">
             <div className="lg:col-span-2 overflow-hidden rounded-xl">
               <img
-                src="https://res.cloudinary.com/djbupbycd/image/upload/v1777452285/banner1_ykzrdc.png"
-                alt="Banner PhươngTrang Store"
-                className="h-48 w-full object-cover object-center lg:h-48"
+                src="https://res.cloudinary.com/djbupbycd/image/upload/v1777999107/banner1_nj1g6x.png"
+                alt="Banner Kim Khí Tuấn Ngọc"
+                className="h-58 w-full object-cover object-center lg:h-58"
               />
             </div>
             <div className="space-y-5">
               <span className="inline-flex rounded-full border border-amber-700 bg-amber-600 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
-                PhươngTrang Store
+                Kim Khí Tuấn Ngọc
               </span>
               <h1 className="text-3xl font-black leading-tight text-zinc-900 lg:text-4xl">
                 Dụng cụ cầm tay và thiết bị cơ khí chính hãng cho thợ chuyên nghiệp

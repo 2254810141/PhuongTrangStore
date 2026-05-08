@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { getCategories } from '../../services/categoryApi'
 import { getBrands } from '../../services/brandApi'
@@ -92,10 +92,10 @@ function Header({ cartCount = 0 }) {
         <div className="flex flex-nowrap items-center gap-6 py-4 xl:gap-8">
           <Link to="/" className="group flex shrink-0 items-center gap-3 whitespace-nowrap">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-amber-700 text-lg font-black">
-              PT
+              TN
             </span>
             <div>
-              <p className="whitespace-nowrap text-lg font-extrabold tracking-wide text-amber-500">PhươngTrang Store</p>
+              <p className="whitespace-nowrap text-lg font-extrabold tracking-wide text-amber-500">Kim Khí Tuấn Ngọc</p>
               <p className="whitespace-nowrap text-xs uppercase tracking-widest text-amber-200">
                 Dụng cụ cầm tay - thiết bị cơ khí
               </p>

@@ -78,6 +78,8 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<ICloudinaryUploadService, CloudinaryUploadService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 builder.Services.AddSignalR();
 builder.Services.AddAuthorization();
